@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Плавное перемещение по карте.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]),
+                destinations = {
+                    'Москва' : new YMaps.GeoPoint(37.609218,55.753559),
+                    'Санкт-Петербург' : new YMaps.GeoPoint(30.313497,59.938531),
+                    'Екатеринбург' : new YMaps.GeoPoint(60.617435,56.829748),
+                    'Одесса' : new YMaps.GeoPoint(30.7058,46.466444)
+                };
+
+            // Центрируем карту на первом городе
+            map.setCenter(destinations['Москва'], 10);
+
+            // Ссылка на контейнер для меню
+            var menuContainer = YMaps.jQuery('#mapMenu');
+
+            // Генерирование меню
+            for (var item in destinations) {
+                // Используем замыкание, чтобы работать с конкретным свойством объекта
+                (function (title, geoPoint) {
+                    // Создаем ссылку, обернутую в тег <p> для более приятного визуального восприятия
+                    YMaps.jQuery("<li><a href=\"#\">" + item + "</a></li>")
+                        .find('a')
+                            // Создаем обработчик по щелчку на ссылке
+                            .bind('click', function () {
+                                
+                                // Подчеркиваем все ссылки
+                                menuContainer.find('a').css('text-decoration', 'underline');
+                                
+                                // Кроме той, на которую щелкнули
+                                YMaps.jQuery(this).css('text-decoration', 'none');
+                                
+                                // Перемещаем карту
+                                map.panTo(geoPoint, {flying: 1});
+                                return false;
+                            })
+                            .end()
+                        
+                        // Записываем элемент списка в список
+                        .appendTo(menuContainer);
+                })(item, destinations[item])
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <ul id="mapMenu"></ul>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

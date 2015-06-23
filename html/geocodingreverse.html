@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Обратное геокодирование.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Запуск процесс геокодера
+            var geocoder = new YMaps.Geocoder(new YMaps.GeoPoint(37.588395, 55.762718), {results: 1});
+
+            // Обработчик успешного завершения процесса геокодирования
+            YMaps.Events.observe(geocoder, geocoder.Events.Load, function () {
+                if (this.length()) {
+                    map.addOverlay(this.get(0));
+                    map.panTo(this.get(0).getGeoPoint())
+                }else {
+                    alert("не найдено")
+                }
+            });
+             
+            // Обработчик неудачного завершения геокодирования
+            YMaps.Events.observe(geocoder, geocoder.Events.Fault, function (geocoder, error) {
+                alert("Произошла ошибка: " + error.message)
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

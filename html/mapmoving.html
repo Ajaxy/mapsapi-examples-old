@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Элементы управления. Автоперемещение карты у границ.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        YMaps.jQuery(function () {
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Свяжем пользовательский элемент с тулбаром с помощью кнопки
+            var edgeMoving = new EdgeMoving(),
+                toolBar = new YMaps.ToolBar();
+            
+            // Создание кнопки-флажка (по умолчанию включена, т.к. элемент управления при добавлении на карту включается автоматически)
+            var buttonEdgeMoving = new YMaps.ToolBarToggleButton({icon: "/i/maps/icon-move.png"}, {selected: 1});
+            
+            // Если кнопка активна, то включаем автоперемещение карты
+            YMaps.Events.observe(buttonEdgeMoving, buttonEdgeMoving.Events.Select, function () {
+                this.enable();
+            }, edgeMoving);
+            
+            // Если неактивна, то отключаем
+            YMaps.Events.observe(buttonEdgeMoving, buttonEdgeMoving.Events.Deselect, function () {
+                this.disable();
+            }, edgeMoving);
+            
+            // Добавление новую кнопку
+            toolBar.add(buttonEdgeMoving);
+            
+            // Добавление элементов управления на карту
+            map.addControl(edgeMoving);
+            map.addControl(toolBar);
+        });
+        
+        // Элемент управление "Автоперемещение карты у границ"
+        function EdgeMoving () {
+            var listener;
+
+            // Добавление элемента управления на карту
+            this.onAddToMap = function (map, position) {
+                this.map = map; 
+                
+                // Центр карты в пикселях
+                var center = map.converter.coordinatesToLocalPixels(map.getCenter()),
+
+                    // Размер карты
+                    size = map.getContainerSize();
+                
+                // Обработчик события перемещения карты
+                listener = YMaps.Events.observe(this.map, this.map.Events.MouseMove, function (map, mEvent) {
+                    // Вектор направления движения
+                    var vector = center.copy().diff(mEvent.getLocalPixels()),
+                        speed = 0;
+                        
+                    // Рассчитываем скорость движения карты
+                    new YMaps.Point(vector.getX() / size.getX(), vector.getY() / size.getY()).apply(function (coord) {
+                        var square = coord * coord;
+                        speed += (square < 0.1) ? 0 : square * 40;
+
+                        return coord;
+                    });
+
+                    // Перемещаем карту
+                    map.startMove(vector, {
+                        speed: speed,
+                        startSpeed: 0,
+                        speedUpTime: 200
+                    });
+                });
+            };
+
+            // Включение элемента управления
+            this.enable = function () {
+                listener.enable();
+            }
+            
+            // Выключение элемента управления
+            this.disable = function () {
+                listener.disable();
+                this.map.stopMove();
+            }
+
+            // Удаление элемента управления
+            this.onRemoveFromMap = function () {
+                listener.cleanup();
+                this.map = listener = null;
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

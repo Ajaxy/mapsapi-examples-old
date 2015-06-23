@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Инициализация карты результатами геокодирования.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Создание объекта геокодера
+            var geocoder = new YMaps.Geocoder("Москва");
+
+            // По завершению геокодирования инициализируем карту первым результатом
+            YMaps.Events.observe(geocoder, geocoder.Events.Load, function (geocoder) {
+                if (geocoder.length()) {
+                    map.setBounds(geocoder.get(0).getBounds());
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+   <!DOCTYPE html>
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    	<title>Примеры. Размещение редактора маршрута на карте</title>
+        <meta http-equiv="Content-Type" content="text/html" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=router-editor" 
+        	type="text/javascript"></script>
+
+        <script type="text/javascript">
+            YMaps.jQuery(function () {
+				// Создание экземпляра карты и привязка его к контейнеру div. 
+				var map = new YMaps.Map( document.getElementById("YMapsID") );
+				// Установка центра, масштаба и типа карты.
+				map.setCenter(new YMaps.GeoPoint(37.64,55.76), 9, YMaps.MapType.MAP);
+				// Создание экземпляров модели и редактора.
+				var routerModel = new YMaps.RouterEditor.RouterModel();
+				var editor = new YMaps.RouterEditor.DragAndDropEditor(routerModel);
+				// Размещение редактора на карте.
+				map.addControl(editor);
+				// Включение режима добавления точек маршрута кликом по карте.
+				editor.startDrawing();          
+			});            
+        </script>
+    </head>
+
+    <body>
+    <table>
+    <tr>
+        <td><div id="YMapsID" style="height:400px; width:600px;"></div></td>
+    </tr>
+    </table>
+    </body>
+
+    </html>
+

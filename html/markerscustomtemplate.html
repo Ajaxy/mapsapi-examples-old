@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Создание собственного значка для метки.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Создание шаблона для значка метки
+            var template = new YMaps.Template("<div>\
+                <img alt=\"123\" style=\"height:$[style.iconStyle.size.y];width:$[style.iconStyle.size.x];\" src=\"$[style.iconStyle.href]\"\/>\
+                <div class=\"CustomPointName\">$[name|0]</div></div>");
+
+            // Создание стиля для значка метки с использованием шаблона
+            var s = new YMaps.Style();
+            s.iconStyle = new YMaps.IconStyle(template);
+            s.iconStyle.offset = new YMaps.Point(-22, -46);
+            s.iconStyle.href = "/i/maps/icons/blue.png";
+            s.iconStyle.size = new YMaps.Point(26, 46);
+            s.iconStyle.shadow = new YMaps.IconShadowStyle();
+            s.iconStyle.shadow.offset = new YMaps.Point(0, -25);
+            s.iconStyle.shadow.href = "/i/maps/icons/blue-shadow.png";
+            s.iconStyle.shadow.size = new YMaps.Point(25, 23);
+            YMaps.Styles.add("example#customPoint", s);
+
+            // Опредление области обзора карты и связанных с ней параметров
+            var bounds = map.getBounds(),
+                pointLb = bounds.getLeftBottom(),
+                span = bounds.getSpan();
+            
+            // Добавление 10 меток в видимую область карты
+            for (var i = 0; i < 10; i++) {
+                var point = new YMaps.GeoPoint(pointLb.getLng() + span.x * Math.random(),
+                                               pointLb.getLat() + span.y * Math.random());
+                var placemark = new YMaps.Placemark(point, {style: "example#customPoint"});
+                placemark.name = i;
+                map.addOverlay(placemark);  
+            }
+        });
+    </script>
+
+    <style type="text/css">
+        .CustomPointDot {
+            font-family:Arial,Geneva CY,Sans-Serif;
+            font-size:12px;
+            font-weight:bold;
+
+            position:absolute;
+            left:1px;
+            top:3px;
+
+            text-align:center;
+            line-height:21px;
+            
+            width:25px;
+            height:18px;
+
+            color:#444444;
+        }
+        
+        .CustomPointName{
+            font-size:12px;
+            font-weight:bold;
+
+            position:relative; 
+            top: -41px; 
+            left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

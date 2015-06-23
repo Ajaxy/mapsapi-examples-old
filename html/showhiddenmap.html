@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Инициализация карты в скрытом диве</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&loadByRequire=1" type="text/javascript"></script>
+    <script type="text/javascript">
+       function showMap () {
+            YMaps.load(function() {
+                // Создание экземпляра карты и его привязка к созданному контейнеру
+                var mapContainer = YMaps.jQuery("#YMapsID"),
+                    map = new YMaps.Map(mapContainer[0]);
+
+                // Контейнер для карты делаем видимым
+                mapContainer.css("display", "");
+
+                // Установка для карты ее центра и масштаба
+                map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <a href="#" onclick="showMap();return false;">показать карту</a>
+    <div id="YMapsID" style="width:500px;height:500px;display:none"></div>
+</body>
+
+</html>

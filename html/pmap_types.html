@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Примеры. Народная карта - типы: НК-Схема и НК-гибрид</title>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=pmap" type="text/javascript"></script>
+	
+	<script type="text/javascript">
+		
+		function init () {
+			peoplesMapScheme = new YMaps.Map( document.getElementById("YPeoplesMapScheme") );
+			peoplesMapScheme.setCenter(new YMaps.GeoPoint(37.64,55.76), 9, YMaps.MapType.PMAP);
+			peoplesMapHybrid = new YMaps.Map( document.getElementById("YPeoplesMapHybrid") );
+			peoplesMapHybrid.setCenter(new YMaps.GeoPoint(37.64,55.76), 9, YMaps.MapType.PHYBRID);
+
+			mapScheme = new YMaps.Map( document.getElementById("YMapScheme") );
+			mapScheme.setCenter(new YMaps.GeoPoint(37.64,55.76), 9, YMaps.MapType.MAP);
+			mapHybrid = new YMaps.Map( document.getElementById("YMapHybrid") );
+			mapHybrid.setCenter(new YMaps.GeoPoint(37.64,55.76), 9, YMaps.MapType.HYBRID);
+		};
+	</script>
+</head>
+
+<body onload="init();">
+	<table>
+		<tr>
+			<td>
+				<strong>Схема:</strong>
+				<div id="YMapScheme" style="height:200px; width:320px;"></div>
+			</td>
+			<td>
+				<strong>НК-схема:</strong>
+				<div id="YPeoplesMapScheme" style="height:200px; width:320px;"></div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<strong>Гибрид:</strong>
+				<div id="YMapHybrid" style="height:200px; width:320px;"></div>
+			</td>
+			<td>
+				<strong>НК-гибрид:</strong>
+				<div id="YPeoplesMapHybrid" style="height:200px; width:320px;"></div>
+			</td>
+		</tr>
+	</table>
+</body>
+
+</html>
+

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Пример использования шаблона.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Создание шаблона для содержимого балуна
+            var s = new YMaps.Style();
+            s.balloonContentStyle = new YMaps.BalloonContentStyle(new YMaps.Template(
+                "<b><span style=\"color:red\">Я</span> - $[name|объект]</b>\
+                <div>$[description]</div>\
+                <div>Подробнее <a href=\"/maps/theory/concepts/map_objects.xml$[metaDataProperty.moreLink]\">здесь</a></div>"
+            ));
+
+            // Создание меток и добавление их на карту
+            var placemark = new YMaps.Placemark(new YMaps.GeoPoint(37.69, 55.71), {style: s});
+            placemark.name = "метка";
+            placemark.description = "С помощью меток можно обозначать на карте различные объекты.";
+            placemark.metaDataProperty.moreLink = "/maps/theory/concepts/map_objects.xml#placemark";
+            map.addOverlay(placemark);
+            
+            var placemark2 = new YMaps.Placemark(new YMaps.GeoPoint(37.58, 55.66), {style: s});
+            map.addOverlay(placemark2);
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

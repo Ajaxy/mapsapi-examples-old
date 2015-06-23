@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Синхронизация двух карт</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+            map.enableScrollZoom();
+
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map2 = new YMaps.Map(YMaps.jQuery("#YMapsID2")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map2.setCenter(new YMaps.GeoPoint(30.313497,59.938531), 11);
+            map2.enableScrollZoom();
+
+            // Обработчики событий карт
+            var synchroListeners;
+            
+            // При щелчке на ссылке карты синхронизируются
+            // При повторном щелчке - синхронизация убирается
+            YMaps.jQuery("#synhromaps").bind("click", function () {
+                if (!synchroListeners) {
+                    synchroListeners = synchronizeMaps(map, map2);
+                    this.innerHTML = "Десинхронизировать карты";
+                } else {
+                    desynchronizeMaps(synchroListeners);
+                    synchroListeners = null;
+                    this.innerHTML = "Синхронизировать карты";
+                }
+                return false;
+            });
+        })
+
+        // Синхронизирует две карты
+        // Возвращает массив обработчиков событий
+        function synchronizeMaps (firstMap, secondMap) {
+            var firstMapListeners = [],
+                secondMapListeners = [];
+
+            // По умолчанию вторая карта центрируется по первой
+            secondMap.setCenter(firstMap.getCenter(), firstMap.getZoom());
+
+            // Обработчики для первой карты
+            firstMapListeners.push (
+                YMaps.Events.observe(firstMap, firstMap.Events.Update, function () {
+                    toggle(secondMapListeners);
+                    secondMap.setCenter(firstMap.getCenter(), firstMap.getZoom());
+                    toggle(secondMapListeners, 1);
+                }),
+
+                YMaps.Events.observe(firstMap, firstMap.Events.Move, function (oMap, offset) {
+                    toggle(secondMapListeners);
+                    secondMap.moveBy(offset);
+                    toggle(secondMapListeners, 1);
+                })
+            );
+
+            // Обработчики для второй карты
+            secondMapListeners.push (
+                YMaps.Events.observe(secondMap, firstMap.Events.Update, function () {
+                    toggle(firstMapListeners);
+                    firstMap.setCenter(secondMap.getCenter(), secondMap.getZoom())
+                    toggle(firstMapListeners, 1);
+                }),
+
+                YMaps.Events.observe(secondMap, firstMap.Events.Move, function (oMap, offset) {
+                    toggle(firstMapListeners);
+                    firstMap.moveBy(offset);
+                    toggle(firstMapListeners, 1);
+                })
+            )
+
+            return firstMapListeners.concat(secondMapListeners);
+
+            function toggle (observers, flagEnable) {
+                for (var i = 0, l = observers.length; i < l; i++) {
+                    observers[i][(flagEnable? "en" : "dis") + "able"]();
+                }
+            };
+        }
+
+        // Убирает синхронизация карт путем уничтожения обработчиков событий
+        function desynchronizeMaps (listeners) {
+            for (var i = 0, l = listeners.length; i < l; i++) {
+                listeners[i].cleanup();
+                listeners[i] = null;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <a id="synhromaps" href="#">Синхронизировать карты</a>
+    <table>
+    <tr>
+        <td>
+            <div id="YMapsID" style="width:600px;height:400px"></div>
+        </td>
+        <td>
+            <div id="YMapsID2" style="width:600px;height:400px"></div>
+        </td>
+    </tr>
+    </table>
+</body>
+
+</html>

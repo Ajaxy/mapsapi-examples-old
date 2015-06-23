@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Перетаскиваемые метки.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(document.getElementById("YMapsID"));
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Создание перетаскиваемой метки
+            var placemark = new YMaps.Placemark(map.getCenter(), {draggable: true});
+            map.addOverlay(placemark);
+
+            // Общее расстояние и предыдущая точка
+            var distance = 0, prev;
+
+            // Установка слушателей событий для метки
+            YMaps.Events.observe(placemark, placemark.Events.DragStart, function (obj) {
+                prev = obj.getGeoPoint().copy();
+            });
+
+            YMaps.Events.observe(placemark, placemark.Events.Drag, function (obj) {
+                var current = obj.getGeoPoint().copy();
+
+                // Увеличиваем пройденное расстояние
+                distance += current.distance(prev);
+                prev = current;
+
+                obj.setIconContent("Пробег: " + YMaps.humanDistance(distance));
+            });
+
+            YMaps.Events.observe(placemark, placemark.Events.DragEnd, function (obj) {
+                // Задаем контент для балуна
+                placemark.name = "Результат";
+                placemark.description = "Вы проехали: " + YMaps.humanDistance(distance);
+                placemark.openBalloon();
+
+                // Стираем содержимое метки и обнуляем расстояние
+                obj.setIconContent(null);
+                distance = 0;
+
+                obj.update();
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

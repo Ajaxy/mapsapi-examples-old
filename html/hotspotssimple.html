@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Простой пример активной области</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=hotspots" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 8);
+
+            // Создание активной области
+            var moscowHotspot = new YMaps.Hotspots.Overlay(
+                [
+                    {
+                        shape : "rect",
+                        coords : [
+                            new YMaps.GeoPoint(37.192552,55.487586),
+                            new YMaps.GeoPoint(38.025884, 56.017724)
+                        ]
+                    }                
+                ], {
+                    hasHint : true
+                }
+            );
+
+            // Задание контента
+            moscowHotspot.name = "Москва";
+            moscowHotspot.description = "Столица РФ";
+
+            // Добавление активной области на карту
+            map.addOverlay(moscowHotspot);
+        })
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

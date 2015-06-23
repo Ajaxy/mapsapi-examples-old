@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Пользовательские координатные системы. Карта Млечного пути.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Вспомогательная функция: ограничивает значение val минимальным и максимальным значениями
+        function boundaryRestrict(val, min, max) {
+            return Math.max(Math.min(val, max), min);
+        }
+
+        // Вспомогательная функция: циклически ограничивает значение val минимальным и максимальным значениями
+        function cycleRestrict(val, min, max) {
+            return val - Math.floor((val - min)/(max - min)) * (max-min);    
+        }
+
+        // Создадим собственный класс точек   
+        function MyPoint (x, y, unbounded) {
+            // unbounded - флаг, показывающий тип точки: ограниченная / неограниченная
+            this.unbounded = !!unbounded;
+            this.setX(x);
+            this.setY(y);
+        }
+
+        MyPoint.prototype = {
+            // возвращает галактическую долготу
+            getX: function () { 
+                return this.x; 
+            },
+
+            // возвращает галактическую широту
+            getY: function () { 
+                return this.y; 
+            },
+
+            // задает долготу: если точка ограниченная, то долгота должна лежать в диапазоне от 0 до 360 градусов
+            setX: function (x) { 
+                this.x = this.unbounded ? x : cycleRestrict(x, 0, 360); 
+                return this; 
+            },
+
+            // задает широту; широта всегда лежит в диапазоне от -90 до 90 градусов
+            setY: function (y) { 
+                this.y = boundaryRestrict(y, -90, 90); 
+                return this; 
+            },
+
+            // создает копию
+            copy: function () { 
+                return new MyPoint(this.x, this.y, this.unbounded); 
+            },
+
+            // передвигает точку; при этом флаг ограниченности сохраняется
+            moveTo: function (point) { 
+                this.setX(point.getX()); this.setY(point.getY()); 
+                return this; 
+            },
+
+            // разность точек в виде вектора
+            diff: function (point) {
+                return new YMaps.Point(point.getX() - this.x, point.getY() - this.y);
+            },
+
+            // сдвигает точку на вектор
+            moveBy: function (vector) {
+                this.setX(this.x + vector.getX()); 
+                this.setY(this.y + vector.getY()); 
+                return this; 
+            },
+
+            // сравнивает две точки
+            equals: function (point) {
+                return (Math.abs(this.getX() - point.getX()) < 1e-8 && Math.abs(this.getY() - point.getY()) < 1e-8);
+            }
+        };
+
+        function MyBounds(leftBottom, rightTop) {
+            this.left = leftBottom.getX();
+            this.right = rightTop.getX();
+            this.bottom = leftBottom.getY();
+            this.top = rightTop.getY();
+            this.unbounded = leftBottom.unbounded && rightTop.unbounded;
+        }
+
+        MyBounds.prototype = {
+
+            // границы области
+            getTop: function () { 
+                return this.top; 
+            },
+
+            getRight: function () { 
+                return this.right; 
+            },
+
+            getBottom: function () {
+                return this.bottom;
+            },
+
+            getLeft: function () {
+                return this.left;
+            },
+
+            // углы области
+            getRightTop: function () {
+                return new MyPoint(this.right, this.top, this.unbounded); 
+            },
+
+            getRightBottom: function () { 
+                return new MyPoint(this.right, this.bottom, this.unbounded); 
+            },
+
+            getLeftBottom: function () {
+                return new MyPoint(this.left, this.bottom, this.unbounded);
+            },
+
+            getLeftTop: function () {
+                return new MyPoint(this.left, this.top, this.unbounded);
+            },
+
+            // центр области
+            getCenter: function () {
+                var x = (this.left + this.right) / 2,
+                    y = (this.top + this.bottom) / 2;
+
+                // Если координата левой точки меньше координаты правой, то надо брать диаметрально противоположную точку
+                if (this.right > this.left && !this.unbounded) {
+                    x += 180;
+                }
+                
+                return new MyPoint(x, y, this.unbounded);
+            },
+
+            // размеры области
+            getSpan: function () {
+                return new YMaps.Size(Math.abs(this.left - this.right), Math.abs(this.top - this.bottom));
+            },
+
+            // вычисляет масштаб карты, при котором область видна целиком
+            getMapZoom: function (map) {
+                var pixelLeftBottom = map.coorSystem.toPixels(this.getLeftBottom()),
+                    pixelRightTop = map.coorSystem.toPixels(this.getRightTop()),
+
+                    // Считаем размеры области в пикселах на последнем масштабе
+                    pixelSpan = pixelLeftBottom.diff(pixelRightTop).apply(Math.abs),
+
+                    // Считаем размер HTML-элемента карты в пикселах
+                    mapSize = map.getContainerSize(),
+
+                    // Считаем отношение размеров области и карты
+                    scale = Math.max(pixelSpan.getX() / mapSize.getX(), pixelSpan.getX() / mapSize.getX()),
+
+                    // Вычисляем, сколько уровней масштабов меньше максимального необходимо для того, чтобы область поместилась полностью
+                    offset = scale < 1 ? 0 : Math.ceil(Math.log(scale)/Math.LN2);
+
+                // Вычисляем уровень масштаба карты
+                return map.coordSystem.getMaxZoom() - offset;
+            },
+
+            // сравнение областей
+            equals: function (myBounds) {
+                var precision = 1e-10; // Точность сравнения объектов
+                return (Math.abs(this.top - myBounds.getTop()) < precision &&
+                        Math.abs(this.right - myBounds.getRight()) < precision &&
+                        Math.abs(this.bottom - myBounds.getBottom()) < precision &&
+                        Math.abs(this.left - myBounds.getLeft()) < precision);
+            },
+
+            // копирование области
+            copy: function () {
+                return new MyBounds(this.getLeftBottom(), this.getRightTop());
+            },
+
+            // возвращает true, если точка попадает в область, и false в противном случае        
+            contains: function (point) {
+                // Если область задана незацикленными точками, приведем ее границы так, чтобы левая граница всегда была больше правой
+                var left = (this.left < this.right && !this.unbounded) ? this.left + 360 : this.right,
+                    right = this.right,
+
+                    // Аналогично, если точка незациклена, приведем ее координаты так, чтобы долгота была больше правой границы области
+                    x = (point.getX() < this.right && !point.unbounded) ? point.getX() + 360 : point.getX(),
+                    y = point.getY();
+                return (x <= left && x >= right && y >= this.bottom && y <= this.top);
+            }
+        }
+
+        function MyCoordSystem () {
+            // Размеры мира на нулевом уровне масштаба
+            this.worldSize = new YMaps.Point(32768, 1024);
+
+            // Ограничение по широте для объектов на карте
+            this.yRestriction = 5;
+
+            // Вычисляем длины одного градуса широты и долготы в пикселах на последнем масштабе
+            this.scale = this.worldSize.copy().scale(new YMaps.Point(1 / 360, 1 / (2 * this.yRestriction)));
+
+            // Длина одного градуса дуги в световых годах
+            this.lightYearsPerDegree = 500;
+        };
+
+        MyCoordSystem.prototype = {
+            // Возвращает объект-точку
+            getCoordPoint: function (x, y, unbounded) {
+                return new MyPoint(x, y, unbounded);
+            },
+
+            // Возвращает объект-область
+            getCoordBounds: function (leftBottom, rightTop) {
+                return new MyBounds(leftBottom, rightTop);
+            },
+
+            // Преобразует координаты точки, заданные в пользовательской координатной системе в пиксельные координаты
+            fromCoordPoint: function (point, anchor) {
+                var x,
+                    y = point.getY();
+
+                // если точка ограниченная и задан anchor, сдвигаем точку как можно ближе к anchor
+                if (!point.unbounded && anchor) {
+                    x = cycleRestrict(point.getX(), anchor.getX() - 180, anchor.getX() + 180);
+                } else {
+                    x = point.getX();
+                }
+
+                return new YMaps.Point(
+                    this.worldSize.getX() - x * this.scale.getX(),
+                    this.worldSize.getY() / 2 - y * this.scale.getY()
+                );
+            },
+
+            // Преобразует пиксельные координаты точки в координаты, заданные в пользовательской координатной системе
+            toCoordPoint: function (pixelPoint, unbounded) {
+                var x = (this.worldSize.getX() - pixelPoint.getX()) / this.scale.getX(),
+                    y = (this.worldSize.getY() / 2 - pixelPoint.getY()) / this.scale.getY();
+
+                return this.getCoordPoint(x, y, unbounded);
+            },
+
+            // Задает ограничения для отображения объектов на карте
+            restrict: function (point) {
+                return point.copy().setY(boundaryRestrict(point.getY(), - this.yRestriction, this.yRestriction));
+            },
+
+            // Возвращает кратчайшее расстояние между двумя точками координатной системы
+            distance: function (point1, point2) {
+                var dx = point1.getX() - point2.getX(),
+                    dy = point1.getY() - point2.getY();
+
+                return this.lightYearsPerDegree * Math.sqrt(dx * dx + dy * dy);
+            },
+
+            // Возвращает максимальный коэффициент масштабирования
+            getMaxZoom: function () {
+                return 2;
+            },
+
+            // Возвращает размеры мира (в пикселах) при максимальном масштабе 
+            getWorldSize: function () {
+                return this.worldSize.copy();
+            }
+        };
+
+        MyCoordSystem.prototype.rulerDistance = MyCoordSystem.prototype.distance;
+
+        YMaps.jQuery(function () {
+                // Создаем декартову систему координат:
+            var myCoordSystem = new MyCoordSystem(),
+
+                // Создаем карту
+                map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0], {
+                    coordSystem: myCoordSystem // передаем нашу систему координат
+                }),
+
+                // Создаем собственный источник тайлов
+                myData = new YMaps.TileDataSource("/i/maps/tiles/galaxy/", false, true),
+
+                // Создаем собственный тип карты
+                myType = new YMaps.MapType(["galaxy"], "Галактика", {textColor: "#706f60", minZoom: 0, maxZoom: 3}),
+
+                // Создаем миникарту
+                miniMap = new YMaps.MiniMap();
+
+            // Указываем правило получения URL картинки по тайловым координатом и уровню масштаба
+            myData.getTileUrl = function (tile, zoom) {
+                return this.getTileUrlTemplate() + "tile-" + (zoom + 5).toString() + "-" + tile.x + "-" + tile.y + ".png";
+            }
+
+            // Переопределим стандартную функцию вывода расстояний: выводим расстояние в парсеках
+            YMaps.humanDistance = function (l) {
+                return Math.round(l / 3.2616) + " пк";
+            }
+
+            // Добавим в список слоев новый слой, использующий наш источник данных
+            YMaps.Layers.add("galaxy", function () { return new YMaps.Layer(myData) });
+
+            // Выставим карте и миникарте наш тип
+            map.setType(myType);
+            miniMap.setType(myType);
+
+            // Добавим миникарту
+            map.addControl(miniMap);
+
+            // Добавим панель инструментов и ползунок масштаба
+            map.addControl(new YMaps.ToolBar());
+            map.addControl(new YMaps.Zoom({ noTips: true }));
+
+            // Выставим центр карты и масштаб
+            map.setCenter(new MyPoint(0, 0), 0);
+
+            // Включим масштабирование колесом мыши
+            map.enableScrollZoom();
+
+            var earth = new YMaps.Placemark(new MyPoint(0, 0), { draggable: 1 });
+            earth.setIconContent("Земля");
+            map.addOverlay(earth);
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="height: 350px; width: 1200px;"></div>
+</body>
+
+</html>

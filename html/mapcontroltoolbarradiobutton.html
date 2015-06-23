@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Добавление радиокнопки на панель инструментов.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            var toolbar = new YMaps.ToolBar();
+
+            // Создание радиокнопки
+            var button = new YMaps.ToolBarRadioButton(YMaps.ToolBar.DEFAULT_GROUP, { 
+                icon: "http://api-maps.yandex.ru/i/0.3/icons/icon-ruler.png", 
+                hint: "Еще одна линейка"
+            });
+
+            // При активной кнопке включается линейка
+            YMaps.Events.observe(button, button.Events.Select, function () {
+                this.getMap().enableRuler();
+            }, toolbar);
+            
+            // При неактивной кнопке линейка выключается
+            YMaps.Events.observe(button, button.Events.Deselect, function () {
+                this.getMap().disableRuler();
+            }, toolbar);
+
+            // Добавление кнопки на панель инструментов
+            toolbar.add(button);
+
+            // Добавление панели инструментов на карту
+            map.addControl(toolbar);
+        })
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

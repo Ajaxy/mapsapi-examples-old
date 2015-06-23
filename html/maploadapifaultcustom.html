@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Пользовательская обработка неудачной загрузки API.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--<script src="http://api-maps.yandex.ru/1.1/index.xml?onerror=apifault" type="text/javascript"></script>-->
+    <script type="text/javascript">
+        // Флаг, обозачающий произошла ли ошибка при загрузке API
+        var flagApiFault = 0;
+
+        // Функция для обработки ошибок при загрузке API
+        function apifault (err) {
+            // Создание обработчика для события window.onLoad
+            // Отображаем сообщение об ошибке в контейнере над картой
+            window.onload = function () {
+                var errorContainer = document.getElementById("error");
+                errorContainer.innerHTML = "При загрузке API произошел сбой. Сообщение об ошибке: \"" + err + "\"";
+                errorContainer.style.display = "";
+            }
+            flagApiFault = 1;
+        }
+    </script>
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=&onerror=apifault" type="text/javascript"></script>
+    <script type="text/javascript">
+        if (!flagApiFault) {
+            // Создание обработчика для события window.onLoad
+            YMaps.jQuery(function () {
+                // Создание экземпляра карты и его привязка к созданному контейнеру
+                var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+                // Установка для карты ее центра и масштаба
+                map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+            })
+        }
+    </script>
+
+    <style type="text/css">
+        /* Сообщение об ошибке (начало) */
+
+            #error {
+                font-size: 0.8em;
+
+                text-align: center;
+
+                width: 590px;
+                padding: 5px;
+                margin: 1em 0;
+
+                border:solid 1px red;
+                background: #fff1f1;
+            }
+
+        /* Сообщение об ошибке (конец) */
+    </style>
+</head>
+
+<body>
+    <div id="error" style="display:none"></div>
+    <div id="YMapsID" style="width:600px;height:400px;background:#ccc"></div>
+</body>
+
+</html>

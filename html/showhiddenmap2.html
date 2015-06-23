@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Инициализация карты скрытом диве.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var container = YMaps.jQuery("#YMapsID"),
+                map = new YMaps.Map(container[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // При щелчке на ссылке меняется видимость контейнера карты
+            YMaps.jQuery("#change-map-visibility").bind('click', function () {
+                container.css('display', (container.css('display') == 'none') ? '' : 'none');
+                map.redraw(); // Перерисовка карты
+                return false;
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <a id="change-map-visibility" href="#">показать/скрыть карту</a>
+    <div id="YMapsID" style="width:600px;height:400px;display:none"></div>
+</body>
+
+</html>

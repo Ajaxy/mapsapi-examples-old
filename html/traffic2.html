@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Подключение слоя пробок</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=traffic" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+                // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]),
+
+                traffic = new YMaps.Traffic.Control({           // Настройки элемента управления
+                    showInfoSwitcher: true,                     // Показать в кнопке переключатель "Дорожные события"
+                    infoLayerOptions: {                         // Опции слоя дорожных событий
+                        cursor: YMaps.Cursor.HELP        
+                    }
+                }, {                                            // Начальное состояние элемента управления
+                    shown: true,                                // Немедленно включить показ пробок
+                    infoLayerShown: true                        // Показывать слой дорожных событий
+                });
+        
+            // Выставляет центр карты в центр Санкт-Петербурга
+            map.setCenter(new YMaps.GeoPoint(30.313,59.939), 9);
+        
+            // добавление элемента управления "Пробки" на карту
+            map.addControl(traffic);
+        })
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

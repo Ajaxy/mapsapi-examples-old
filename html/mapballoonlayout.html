@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Простой макет для балуна.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Создания стиля для балуна
+            var style = new YMaps.Style();
+            style.balloonStyle = {template: new YMaps.LayoutTemplate(SampleBalloonLayout)};
+
+            // Создание метки с созданным стилем и добавление ее на карту
+            var placemark = new YMaps.Placemark(new YMaps.GeoPoint(37.64, 55.76), {style: style});
+            placemark.description = "Здесь можно разместить описание метки.";
+            map.addOverlay(placemark);
+        });
+
+        // Макет для балуна, реализующий интерфейс YMaps.IBalloonLayout
+        function SampleBalloonLayout() {
+            this.element = YMaps.jQuery(
+                "<div class=\"b-simple-balloon-layout\">\
+                    <div class=\"content\"></div>\
+                    <div class=\"close\"></div>\
+                    <div class=\"tail\"></div></div>");
+
+            this.close = this.element.find(".close");
+            this.content = this.element.find(".content");
+
+            // Отключает кнопку закрытия балуна
+            this.disableClose = function(){
+                this.close.unbind("click").css("display", "none");
+            };
+
+            // Включает кнопку закрытия балуна
+            this.enableClose = function(callback){
+                this.close.bind("click", callback).css("display", "");
+                return false;
+            };
+
+            // Добавляет макет на страницу
+            this.onAddToParent = function (parentNode) {
+                YMaps.jQuery(parentNode).append(this.element);
+                this.update();
+            };
+
+            // Удаляет макет со страницы
+            this.onRemoveFromParent = function () {
+                this.element.remove();
+            };
+
+            // Устанавливает содержимое
+            this.setContent = function (content) {
+                content.onAddToParent(this.content[0]);
+            };
+
+            // Обработка обновления
+            this.update = function () {
+                this.element.css("margin-top", this.getOffset().getY());
+            };
+
+            // Возвращает сдвиг макета балуна относительно его точки позиционирования
+            this.getOffset = function () {
+                return new YMaps.Point(0, -this.content.height() - 45);
+            };
+
+            // Устанавливает максимально допустимый размер содержимого балуна
+            this.setMaxSize = function (maxWidth, maxHeight) {};
+        };
+    </script>
+
+    <style type="text/css">
+        /* Внешний вид балуна (начало)*/
+
+            .b-simple-balloon-layout {
+                position: relative;
+
+                width: 150px;
+                padding: 10px;
+                margin-left: -10px;
+                
+                border: 1px solid #848877;
+                background: #f8ffe0;
+            }
+
+        /* Внешний вид балуна (конец)*/
+
+        /* "Хвостик" балуна (начало)*/
+
+            .b-simple-balloon-layout .tail {
+                position: absolute;
+                
+                width: 30px;
+                height: 24px;
+                margin-top: 10px;
+                
+                background: url("http://api.yandex.ru/i/maps/tail.png") no-repeat;
+            }
+
+        /* "Хвостик" балуна (конец)*/
+
+        /* Кнопка закрытия балуна (начало)*/
+
+            .b-simple-balloon-layout .close {
+                position: absolute;
+                right: 0;
+                top: 0;
+
+                width: 13px;
+                height: 13px;
+                margin-right: 5px;
+                margin-top: 5px;
+                
+                background: url("http://api-maps.yandex.ru/i/0.3/balloon/close.gif") no-repeat;
+                cursor: pointer;
+            }
+
+        /* "Кнопка закрытия балуна (конец)*/
+    </style>
+
+    <!--[if lte IE 6]>  
+    <style type="text/css">  
+
+        .b-simple-balloon-layout .tail {
+            background: none;
+            filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="http://api.yandex.ru/i/maps/tail.png", sizingMethod="scale");
+        }
+
+    </style>  
+    <![endif]-->
+
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

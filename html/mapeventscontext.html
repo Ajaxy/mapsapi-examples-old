@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Задание контекста для слушателя.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            var application = new MyApplication();
+        });
+
+        // Класс, выполняющий роль контекста для обработчика событий
+        function MyApplication () {
+            this.counter = 0;
+            this.map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+            this.map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            YMaps.Events.observe(this.map, this.map.Events.Click, this.onMapClick, this);
+        };
+
+        // Счетчик щелков по карте
+        MyApplication.prototype.onMapClick = function () {
+            this.counter++;
+            alert("Количество щелчков: " + this.counter);
+        };
+
+        
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

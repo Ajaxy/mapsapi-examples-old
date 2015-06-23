@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Создание собственного значка для метки.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Создание стиля для значка метки
+            var s = new YMaps.Style();
+            s.iconStyle = new YMaps.IconStyle();
+            s.iconStyle.href = "/i/maps/icons/photo.png";
+            s.iconStyle.size = new YMaps.Point(18, 29);
+            s.iconStyle.offset = new YMaps.Point(-9, -29);
+            
+            s.iconStyle.shadow = new YMaps.IconShadowStyle();
+            s.iconStyle.shadow.href = "/i/maps/icons/photo-shadow.png";
+            s.iconStyle.shadow.size = new YMaps.Point(18, 29);
+            s.iconStyle.shadow.offset = new YMaps.Point(-4, -29);
+
+            // Создание метки и добавление ее на карту
+            var placemark = new YMaps.Placemark(map.getCenter(), {style: s});
+            map.addOverlay(placemark);
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

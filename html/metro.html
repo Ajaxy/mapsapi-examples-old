@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Использование модуля "Метро".</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=metro" type="text/javascript"></script>
+ <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]),
+
+                // Ближайшие станции метро
+                metro,
+
+                // Обработчики успшеного и неудачного завершения выполнения запроса
+                listenerMetroLoad,
+                listenerMetroFault,
+
+                // Точка, относительно которой ищутся ближайшие станции метро
+                point;
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.62, 55.76), 14);
+
+            // При щелчке по карте будем производить поиск
+            YMaps.Events.observe(map, map.Events.Click, function (map, e) {
+
+                // Очистка предыдущих результатов
+                if (point) {
+                    map.removeOverlay(point);
+                }
+                if (metro) {
+                    map.removeOverlay(metro);
+                    listenerMetroLoad.cleanup();
+                    listenerMetroFault.cleanup();
+                }
+
+                // Добавляется точка, вокруг которой ищутся станции метро
+                point = new YMaps.Placemark(e.getGeoPoint(), { hasBalloon : false } );
+                map.addOverlay(point);
+
+                // Поиск ближайших станций метро
+                metro = new YMaps.Metro.Closest(e.getGeoPoint(), { results : 3 } );
+                
+                // Обработчик успешного завершения запроса
+                listenerMetroLoad = YMaps.Events.observe(metro, metro.Events.Load, function (metro) {
+                    if (metro.length()) {
+                        
+                        metro.setStyle({
+                            parentStyle : "default#greenSmallPoint",
+                            balloonContentStyle : {
+                                template : new YMaps.Template("<div>$[text]</div>")
+                            }
+                        });
+
+                        map.addOverlay(metro);
+                    } else {
+                        alert("Поблизости не найдено станций метро");
+                    }
+                });
+
+                // Обработчик неудачного завершения выполнения запроса
+                listenerMetroFault = YMaps.Events.observe(metro, metro.Events.Fault, function (metro, error) {
+                    alert("При выполнении запроса произошла ошибка: " + error);
+                });
+            });
+        })
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

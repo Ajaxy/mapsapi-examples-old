@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Редактор маршрута. Обработка ответа маршрутизатора</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=router-editor" type="text/javascript"></script>
+    <script type="text/javascript">
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и привязка его к контейнеру div
+            var map = new YMaps.Map( document.getElementById("YMapsID") );
+
+            // Установка центра, масштаба и типа карты
+            map.setCenter(new YMaps.GeoPoint(37.608984,55.76134), 13, YMaps.MapType.MAP);
+
+            // Создание экземпляров модели и редактора
+            var routerModel = new YMaps.RouterEditor.RouterModel();
+            var editor = new YMaps.RouterEditor.DragAndDropEditor(routerModel);
+
+            // Построение маршрута от ст. метро Белорусская до ст. метро Лубянка
+            // через промежуточную точку (37.604682, 55.752516)
+            routerModel.getRouteProvider().route({
+                    wayPoints: ['Белорусская', new YMaps.GeoPoint(37.604682, 55.752516), 'Лубянка'],
+                    viaPoints: [1],
+                },
+                function (rr) {
+                    // Передача полученного результат в модель
+                    // Модель оповестит о новом маршруте редактор
+                    routerModel.setRouterResult(rr);
+                }
+            );
+            // Размещение редактора на карте
+            map.addControl(editor);            
+
+            // При обновлении маршрута обновляем информацию о нем
+            YMaps.Events.observe(routerModel, routerModel.Events.RouterResultChange, function (rr) {
+                // Вспомогательный класс для обработки ответа маршрутизатора
+                var helper = new YMaps.RouterEditor.RouterResultHelper(rr);
+
+                // Вывод протяженности построенного маршрута
+                YMaps.jQuery('#info').html( 'Протяженность маршрута ~ ' + YMaps.humanDistance(helper.getDistance()) );
+            });
+        });            
+    </script>
+
+</head>
+
+<body>
+
+    <div id="YMapsID" style="height:400px; width:600px;"></div>
+    <div id="info"/>
+
+</body>
+
+</html>
+
+

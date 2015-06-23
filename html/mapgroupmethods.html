@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Работа с группой меток.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Добавление элементов управления
+            map.enableScrollZoom();
+
+             // Создание стиля для многоугольника
+            YMaps.Styles.add("user#polygon", {
+                hasBalloon : false,
+                polygonStyle : {
+                    fill : true,
+                    outline : true,
+                    strokeWidth : 10,
+                    strokeColor : "ff000088",
+                    fillColor : "ff000033"
+                }
+            });
+
+            // Предварительная загрузка картинки-взрыва
+            var explosionImage = new Image();
+            explosionImage.src = "/i/maps/explosion.gif";
+
+            // Создание стиля-взрывчика для метки
+            YMaps.Styles.add("user#placemark", {
+                hasBalloon : false,
+                iconStyle : {
+                    href : "/i/maps/explosion.gif",
+                    size : new YMaps.Point(61, 50),
+                    offset : new YMaps.Point(-25, -40)
+                }
+            });
+
+            // Многоугольник, ограничивающий Москву до МКАДа включительно
+            var polygonMoscow = new YMaps.Polygon([
+                new YMaps.GeoPoint(37.600963,55.575358), new YMaps.GeoPoint(37.508095,55.596356), new YMaps.GeoPoint(37.435574,55.66045),
+                new YMaps.GeoPoint(37.414553,55.685285), new YMaps.GeoPoint(37.385385,55.713877), new YMaps.GeoPoint(37.369431,55.745985),
+                new YMaps.GeoPoint(37.369952,55.76645), new YMaps.GeoPoint(37.376554,55.794178), new YMaps.GeoPoint(37.397018,55.835862),
+                new YMaps.GeoPoint(37.392517,55.849757), new YMaps.GeoPoint(37.400378,55.864414), new YMaps.GeoPoint(37.446695,55.882156),
+                new YMaps.GeoPoint(37.478774,55.88562), new YMaps.GeoPoint(37.536023,55.907798), new YMaps.GeoPoint(37.590731,55.910397),
+                new YMaps.GeoPoint(37.641432,55.897044), new YMaps.GeoPoint(37.704493,55.89294), new YMaps.GeoPoint(37.835378,55.827924),
+                new YMaps.GeoPoint(37.846571,55.77758), new YMaps.GeoPoint(37.838441,55.71054), new YMaps.GeoPoint(37.830249,55.685899),
+                new YMaps.GeoPoint(37.842627,55.655717), new YMaps.GeoPoint(37.766432,55.605648), new YMaps.GeoPoint(37.687812,55.574365)
+            ], {style: "user#polygon"});
+            map.addOverlay(polygonMoscow);
+
+            // Создание группы
+            var group = new YMaps.GeoObjectCollection();
+            map.addOverlay(group);
+
+            // Добавление элементов у группу
+            group.add([
+                new YMaps.Placemark(new YMaps.GeoPoint(37.554265,55.71554), {draggable: true}),
+                new YMaps.Placemark(new YMaps.GeoPoint(37.518234,55.708937), {draggable: true}),
+                new YMaps.Placemark(new YMaps.GeoPoint(37.514146,55.722294), {draggable: true}),
+                new YMaps.Placemark(new YMaps.GeoPoint(37.471216,55.707065), {draggable: true}),
+                new YMaps.Placemark(new YMaps.GeoPoint(37.756341,55.66141), {draggable: true}),
+                new YMaps.Placemark(new YMaps.GeoPoint(37.562108,55.777575), {draggable: true})
+            ]);
+
+            // Обработаем все элементы группы
+            group.forEach(function (obj) {
+                // Создание обработчика для события DragEnd
+                YMaps.Events.observe(obj, obj.Events.DragEnd, function (obj) {
+
+                    if (!polygonMoscow.contains(obj.getGeoPoint())) {
+                        // Установка нового стиля для метки
+                        obj.setStyle("user#placemark");
+
+                        // Через секунду происходит удаление элемента из группы
+                        setTimeout(function () {
+                            obj.getParentGroup().remove(obj);
+                        }, 1000);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:600px"></div>
+</body>
+
+</html>

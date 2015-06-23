@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Нанесение на карту статичного слоя.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Добавление слоя на карту
+            map.addLayer(new StaticLayer(16));
+        })
+
+        // Слой, отображающий квадрат в центре экрана
+        function StaticLayer (size) {
+            var element,
+                halfSize;
+            
+            size = size || 10;
+            halfSize = size / 2;
+
+            // Вызывается при добавлении слоя на карту
+            this.onAddToMap = function (map, parentContainer) {
+                var containerSize = map.getContainerSize();
+
+                element = YMaps.jQuery("<div/>")
+                    .css({
+                        zIndex: YMaps.ZIndex.MAP_LAYER,
+                        position: "absolute",
+                        background: "green",
+                        left: containerSize.getX() / 2 - halfSize,
+                        top: containerSize.getY() / 2 - halfSize,
+                        height: size, 
+                        width: size
+                    })
+                    .appendTo(parentContainer);
+            };
+
+            // Вызывается при удалении слоя с карты
+            this.onRemoveFromMap = function () {
+                if (element) {
+                    element.remove();
+                    element = halfSize = null;
+                }
+            };
+
+            // остальным методам присваиваем пустую реализацию
+            this.onMove =
+            this.onMapUpdate =
+            this.getCopyright =
+            this.onRemoveFromMap =
+            this.onSmoothZoomEnd =
+            this.onSmoothZoomStart =
+            this.onSmoothZoomTick = function () {};
+        }
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

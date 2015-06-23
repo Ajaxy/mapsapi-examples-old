@@ -1,0 +1,104 @@
+<html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Пример использования хотспотов</title>
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=hotspots" type="text/javascript"></script>
+    <script>
+            // Карта
+        var map,
+
+            // Коллекция активных областей
+            regionCollection = new YMaps.GeoObjectCollection();
+
+        YMaps.jQuery(function () {
+            map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]),
+            map.setCenter(new YMaps.GeoPoint(105, 68), 3);
+            map.enableScrollZoom();
+
+            // Создаем стиль подсветки региона
+            var style = new YMaps.Style();
+            style.polygonStyle = new YMaps.PolygonStyle();
+
+            // Полупрозрачный розовый цвет заливки
+            style.polygonStyle.fillColor = 'd0808080';
+            style.polygonStyle.outline = false;
+
+            // Добавляем стиль в хранилище стилей
+            YMaps.Styles.add('my#regionPolygon', style);
+
+            // Обрабатываем событие добавления новой активной области в коллекцию
+            YMaps.Events.observe(regionCollection, regionCollection.Events.Add, function (collection, item) {
+                // Создаем обработчики событий MouseEnter и MouseLeave для каждой добавленной области
+                item.listeners = [
+                    YMaps.Events.observe(item, item.Events.MouseEnter, onMouseEnter),
+                    YMaps.Events.observe(item, item.Events.MouseLeave, onMouseLeave)
+                ];
+            });
+
+            // Загружаем данные
+            YMaps.jQuery.getScript('hotspots-example-1.data.js', function () {
+                // Как только данные готовы, начинаем обрабатывать событие обновления карты
+                YMaps.Events.observe(map, map.Events.Update, update);
+                update();
+            });
+        });
+
+        // Добавляет или удаляет активные области на карту
+        function update() {
+            var zoom = map.getZoom();
+
+            // Если коэффициент масштабирования выходит за диапазон [3, 6]
+            if (zoom > 6 || zoom < 3) {
+                // И если коллекция областей в данный момент добавлена на карту
+                if (regionCollection.getMap()) {
+                    // Удаляем области
+                    map.removeOverlay(regionCollection);
+                }
+            } else {
+                // Если коэффициент масштабирования находится в допустимом диапазоне,
+                // а коллекция областей не добавлена на карту
+                if (!regionCollection.getMap()) {
+                    // Добавляем области
+                    map.addOverlay(regionCollection);
+                }
+            }
+        }
+
+        // Обработчик события наведения курсора мыши на регион
+        function onMouseEnter (region) {
+            // Получаем описание геометрии региона
+            var geometry = region.getGeometry();
+            
+            // Если это первый MouseEnter, и коллекция многоугольников еще не создана
+            if (!region.polygonCollection) {
+                // Создаем новую коллекцию геообъектов
+                region.polygonCollection = new YMaps.GeoObjectCollection();
+                // Перебираем все фигуры из описания геометрии региона
+                for (var i = 0, l = geometry.length; i < l; i++) {
+                    // Для каждой фигуры создаем новый многоугольник;
+                    var polygon = new YMaps.Polygon(geometry[i].coords, {
+                        // Состояние интерактивности многоугольника: в состоянии YMaps.Interactivity.NONE
+                        // многоугольник не будет закрывать собой активную область
+                        interactive: YMaps.Interactivity.NONE,
+                        style: 'my#regionPolygon'
+                    });
+                    // Добавляем многоугольник в коллекцию
+                    region.polygonCollection.add(polygon);
+                }
+            }
+            // Добавляем многоугольники на карту
+            map.addOverlay(region.polygonCollection);
+        }
+
+        // Обработчик события ухода курсора мыши с региона
+        function onMouseLeave (region, e) {
+            // Удаляем ранее добавленные многоугольники
+            map.removeOverlay(region.polygonCollection);
+        }
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width: 1000px; height: 700px;"></div>
+</body>
+
+</html>

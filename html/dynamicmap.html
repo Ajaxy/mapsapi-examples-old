@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Пример интерактивной карты</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(33.989996,53.674253), 6, YMaps.MapType.HYBRID);
+
+            // Добавление элементов управления
+            map.addControl(new YMaps.TypeControl());
+            map.addControl(new YMaps.ToolBar());
+            map.addControl(new YMaps.Zoom());
+            map.addControl(new YMaps.SearchControl());
+
+            // Создание меток
+            var moscow = new YMaps.Placemark(new YMaps.GeoPoint(37.571534,55.705884), {style: 'default#redPoint'});
+            moscow.setBalloonContent("Москва");
+            map.addOverlay(moscow);
+            moscow.setIconContent('<img src="/i/maps/moscow-emblem.png" width="59" height="70" alt="Герб Москвы"/>');
+
+            var kiev = new YMaps.Placemark(new YMaps.GeoPoint(30.540285,50.363719), {style: 'default#orangePoint'});
+            kiev.setBalloonContent("Киев");
+            map.addOverlay(kiev);
+            kiev.setIconContent('<img src="/i/maps/kiev-emblem.png" width="50" height="70" alt="Герб Киева"/>');
+
+            // Создание ломаной линии
+            var polyline = new YMaps.Polyline([
+                new YMaps.GeoPoint(37.521336,55.696199), new YMaps.GeoPoint(36.906098,55.465937),
+                new YMaps.GeoPoint(36.609474,55.315852), new YMaps.GeoPoint(36.565528,55.070742),
+                new YMaps.GeoPoint(36.334814,54.925483), new YMaps.GeoPoint(35.939304,54.44812),
+                new YMaps.GeoPoint(35.576753,54.326291), new YMaps.GeoPoint(35.181251,54.016898),
+                new YMaps.GeoPoint(34.994483,53.841838), new YMaps.GeoPoint(34.873632,53.789827),
+                new YMaps.GeoPoint(34.620945,53.45017), new YMaps.GeoPoint(34.401217,53.292478),
+                new YMaps.GeoPoint(34.269381,53.233193), new YMaps.GeoPoint(34.42319,52.795909),
+                new YMaps.GeoPoint(34.126566,52.421376),new YMaps.GeoPoint(33.884866,52.002958),
+                new YMaps.GeoPoint(33.434424,51.751364), new YMaps.GeoPoint(33.357519,51.573721),
+                new YMaps.GeoPoint(33.17075,51.402249), new YMaps.GeoPoint(33.126804,51.230134),
+                new YMaps.GeoPoint(31.841405,51.029661), new YMaps.GeoPoint(31.544772,50.897842),
+                new YMaps.GeoPoint(31.434908,50.793508), new YMaps.GeoPoint(31.259135,50.716848),
+                new YMaps.GeoPoint(30.885598,50.54915), new YMaps.GeoPoint(30.588965,50.422982)
+            ], {
+                style: {
+                    lineStyle: {
+                        strokeColor: "fd32fbFF",
+                        strokeWidth:5
+                    }
+                },
+                hasHint: 1
+            });
+
+            polyline.name = 'Дорога';
+            polyline.description = '<p>Дорога длинная была...</p><p><img src="/i/maps/doroga.jpg"></p>';
+
+            map.addOverlay(polyline);
+            polyline.openBalloon();
+        })
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:600px"></div>
+</body>
+
+</html>

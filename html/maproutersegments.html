@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Маршрутизатор.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.62, 55.74), 12);
+
+            // Добавим на карту схему проезда
+            // ст.м. Арбатская - Кропоткинская - Третьяковская.
+            // Полный маршрут делится на два:
+            // Арбатская - Кропоткинская и Кропоткинская - Третьяковская.
+            // Построим простейший маршрутный лист, помогающий проехать
+            // по второму маршруту.
+            var router = new YMaps.Router(
+                   // Список точек, которые необходимо посетить
+                   ["Москва, Арбатская", "Москва, Кропоткинская", "Москва, Третьяковская"],[],
+                   { viewAutoApply: true }
+               );
+            map.addOverlay(router); // Добавляем на карту полный маршрут
+
+            YMaps.Events.observe(router, router.Events.Success, function () {
+               var route = router.getRoute(1);
+               var itineraryList = ["Трогаемся."];
+               var action = [];
+               action["back"] = "назад";
+               action["left"] = "налево";
+               action["right"] = "направо";
+               action["none"] = "прямо";
+               
+               for (var i=0; i  < route.getNumRouteSegments(); i++) {
+                  var segment = route.getRouteSegment(i);
+                  itineraryList.push("Едем " + action[segment.getAction()] + " на " + segment.getStreet() + ", проезжаем " + segment.getDistance() + " м.");
+               }
+               
+               itineraryList.push("Останавливаемся.");
+               alert(itineraryList.join("\n"));
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

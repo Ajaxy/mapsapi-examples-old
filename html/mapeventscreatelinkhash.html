@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>События. Создание ссылки на фрагмент карты.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]),
+
+                // Конвертер типов карт
+                typeConverter = new TypeConverter();
+
+            // Добавление элементов управления
+            map.addControl(new YMaps.SmallZoom());
+            map.addControl(new YMaps.ToolBar());
+            map.addControl(new YMaps.TypeControl());
+            map.enableScrollZoom();
+
+            // Получаем параметры из URL'а
+            var params = {
+                ll : getParam("ll"),    // Центр карты
+                spn : getParam("spn"),  // Линейный размер области
+                t : getParam("t")       // Тип карты
+            };
+
+            // Если в урле заданы необходимые параметры
+            if (params.ll && params.spn && params.t) {
+                // Центрируем карту в нужном месте
+                var bounds = YMaps.GeoBounds.fromCenterAndSpan(YMaps.GeoPoint.fromString(params.ll), YMaps.Size.fromString(params.spn));
+                map.setBounds(bounds);
+
+                // Устанавливаем требуемый тип карты
+                map.setType(typeConverter.nameToType(params.t));
+            } else {
+                // По умолчанию карта центрируется на Москве
+                map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+            }
+
+            // Динамически формируем URL
+            YMaps.Events.observe(map, [map.Events.BoundsChange, map.Events.TypeChange],  function () {
+                document.location.hash = "#t=" + typeConverter.typeToName(map.getType()) +
+                                         "&ll=" + map.getCenter().toString() +
+                                         "&spn=" + map.getBounds().getSpan().toString(6)
+            });
+            
+            // Получение параметра из URL'а
+            function getParam (name, location) {
+                location = location || window.location.hash;
+                var res = location.match(new RegExp('[#&]' + name + '=([^&]*)', 'i'));
+                return (res && res[1] ? res[1] : '');
+            }
+
+            // Конвертер типов карт
+            // Если тип карты не был определен, то по умолчанию возвращается тип карты YMaps.MapType.MAP (или имя "map")
+            function TypeConverter () {
+                // Доступные типы карты
+                var types = [YMaps.MapType.MAP, YMaps.MapType.SATELLITE, YMaps.MapType.HYBRID],
+
+                    // Имена карт
+                    names = ["map", "sat", "hyb"];
+
+                // Возвращает имя карты по ее типу
+                this.typeToName = function (type) {
+                    return names[valid(types.indexOf(type))];
+                };
+
+                // Возвращает тип карты по имени
+                this.nameToType = function (name) {
+                    return types[valid(names.indexOf(name))];
+                };
+
+                // Проверяет правильность полученного индекса
+                function valid (index) {
+                    return (index == -1) ? 0 : index;
+                }
+            };
+        });
+
+        // В IE6 отсутствует метод indexOf для массива
+        if(!Array.indexOf){
+           Array.prototype.indexOf = function(obj){
+              for(var i=0; i<this.length; i++){
+                 if(this[i]===obj){
+                    return i;
+                 }
+              }
+              return -1;
+           }
+        }
+    </script>
+</head>
+
+<body>
+
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

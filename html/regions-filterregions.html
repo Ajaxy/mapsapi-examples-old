@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Добавление на карту выбранных регионов.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=regions" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(30.532685,50.40241), 7);
+            
+            // Загрузка регионов для Украины
+            YMaps.Regions.load("ua", function (state, response) {
+                if (state == YMaps.State.SUCCESS) {
+                    // Добавление только киевской области на карту
+                    var regionKiev = response.filter(function (obj) {
+                        return obj.name == "Киевская область";
+                    })[0];
+                    map.addOverlay(regionKiev);
+                } else {
+                    alert("Во время выполнения запроса произошла ошибка: " + response.error.message)
+                }
+            });
+        })
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

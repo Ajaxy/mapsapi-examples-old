@@ -1,0 +1,73 @@
+<html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Пример использования хотспотов</title>
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=hotspots" type="text/javascript"></script>
+    <script>
+        var extend = function (child, parent) {
+            var c = function () {};
+            c.prototype = parent.prototype;
+            c.prototype.constructor = parent;
+            return child.prototype = new c;
+        };
+
+        YMaps.jQuery(function () {
+            // Создаем карту
+            var map = new YMaps.Map(document.getElementById('YMapsID'));
+            map.setCenter(new YMaps.GeoPoint(52, 57), 4);
+            map.enableScrollZoom();
+            
+            // Создаем источник "картиночных" тайлов
+            var ds = new YMaps.TileDataSource('heroes/', true, false);
+            // Задаем правило формирования URL тайлов
+            ds.getTileUrl = function (tileNumber, zoom) {
+                return this.getTileUrlTemplate() + 'tile-' + tileNumber.getX() + '-' + tileNumber.getY() + '-' + zoom + '.png';
+            }
+            // Создадим карточный слой
+            var imageLayer = new YMaps.Layer(ds);
+            // Добавляем слой на карту
+            map.addLayer(imageLayer);
+            
+            // Объявим собственный класс объектов и унаследуем его от стандартного
+            var myObject = function () {
+                YMaps.Hotspots.Object.apply(this, arguments);
+            };
+            var ptp = extend(myObject, YMaps.Hotspots.Object);
+            
+            // Переопределим функцию получения содержимого балуна
+            ptp.requestBalloonData = function (callback, e, shape) {
+                    // В балуне в отдельном фрейме покажем страницу Википедии с информацией о городе
+                var data = '<iframe style="width: 850px; height: 550px;" src="http://ru.wikipedia.org/wiki/' + this.getData().name + '"/>',
+                    // Вычислим точку, в которой необходимо открыть балун.
+                    // Прибавим к верхнему левому углу фигуры смещение (10, 5).
+                    pixelCenter = new YMaps.Point(shape.getMinX() + 10, shape.getMinY() + 5),
+                    // Переведем в географические координаты
+                    geoCenter = map.coordSystem.toCoordPoint(map.tileCoordinates.scale(pixelCenter, map.getZoom(), map.coordSystem.getMaxZoom()));
+                
+                // Отдадим функции-обработчику содержимое балуна и точку его привязки
+                callback(data, geoCenter);    
+            }
+            
+            // Создаем источник объектов
+            var os = new YMaps.Hotspots.ObjectSource('heroes/', 'heroes-');
+            // Определяем правила формирования URL тайла с данными
+            os.getTileUrl = function (tileNumber, zoom) {
+                return this.getTileUrlTemplate() + 'tile-' + tileNumber.getX() + '-' + tileNumber.getY() + '-' + zoom + '.js';
+            };
+            // Определяем правила формирования ключа ответа сервера
+            os.getKey = function (tileNumber, zoom) {
+                return this.getKeyTemplate() + tileNumber.getX() + '-' + tileNumber.getY() + '-' + zoom;
+            };
+            // Определяем правило создания объектов-активных областей
+            os.createObject = function (layer, data, shapes, priority) {
+                return new myObject(layer, data, shapes, priority);
+            };
+            
+            // Создаем слой активных областей
+            var hsLayer = new YMaps.Hotspots.Layer(os);
+            // Добавим слой на карту
+            map.addLayer(hsLayer);
+        });
+    </script>
+</head><body>
+    <div id="YMapsID" style="width: 1000px; height: 700px;"/>
+</body></html>

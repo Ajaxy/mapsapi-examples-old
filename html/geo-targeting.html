@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Геотаргетинг.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+                // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]),
+                
+                // Центр карты
+                center,
+                
+                // Масштаб
+                zoom = 10;
+
+            // Получение информации о местоположении пользователя
+            if (YMaps.location) {
+                center = new YMaps.GeoPoint(YMaps.location.longitude, YMaps.location.latitude);
+
+                if (YMaps.location.zoom) {
+                    zoom = YMaps.location.zoom;
+                }
+
+                map.openBalloon(center, "Место вашего предположительного местоположения:<br/>"
+                    + (YMaps.location.country || "")
+                    + (YMaps.location.region ? ", " + YMaps.location.region : "")
+                    + (YMaps.location.city ? ", " + YMaps.location.city : "")
+                )
+            }else {
+                center = new YMaps.GeoPoint(37.64, 55.76);
+            }
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(center, zoom);
+        })
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

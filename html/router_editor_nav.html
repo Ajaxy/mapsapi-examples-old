@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Редактор маршрута. Выбор маршрута с помощью меню</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==&modules=router-editor" type="text/javascript"></script>
+    <script type="text/javascript">
+        YMaps.jQuery(function () {
+            var map = new YMaps.Map( document.getElementById("YMapsID") );
+            map.setCenter(new YMaps.GeoPoint(37.533795, 55.779003), 11, YMaps.MapType.MAP);
+
+            // Начальная точка маршрута.
+            var office = createPlacemark(new YMaps.GeoPoint(37.588153,55.733781), 'Офис Яндекса', 'Москва, Льва Толстого, 16');
+            office.setStyle("default#greenPoint");
+            map.addOverlay(office);
+
+            // Конечные точки маршрута.
+            var destinations = new YMaps.GeoObjectCollection();
+            destinations.add(createPlacemark(new YMaps.GeoPoint(37.5784618, 55.7611226), 'Зоопарк', 'Москва, Большая Грузинская улица, дом 1'));
+            destinations.add(createPlacemark(new YMaps.GeoPoint(37.6377547, 55.8262384), 'Всероссийский выставочный центр', 'Москва, проспект Мира, владение 119'));
+            map.addOverlay(destinations);
+
+            // Создание элемента управления
+            // (меню для выбора конечной точки маршрута).
+            map.addControl(new RoutesNavigator(office, destinations));
+            map.addControl(new YMaps.TypeControl());
+            //map.addControl(new YMaps.ToolBar());
+            map.addControl(new YMaps.Zoom());
+        });
+
+        // Функия создания метки
+        function createPlacemark (geoPoint, name, description) {
+            var placemark = new YMaps.Placemark(geoPoint);
+            placemark.name = name;
+            placemark.description = description;
+
+            return placemark;
+        }
+
+        // Управляющий элемент "Навигатор по маршрутам".
+        // Реализиует интерфейс YMaps.IControl.
+        function RoutesNavigator (office, destinations) {
+            // Создание экземпляра модели.
+            this.routerModel = new YMaps.RouterEditor.RouterModel();
+            // Создание экземпляра редактора.
+            this.editor = new YMaps.RouterEditor.DragAndDropEditor(this.routerModel, {
+                    viaPointHintContent: 'Перетащите точку или удалите ёё двойным щелчком',
+                    cursorHintContent: 'Перетащите метку, чтобы создать промежуточную точку',
+                    maxPoints: 3
+                }
+            );
+
+            // Хранилище построенных маршрутов.
+            this.cacheRoutes = [];
+
+            // Размещение на карте.
+            this.onAddToMap = function (map, position) {
+                this.container = YMaps.jQuery("<ul>Едем в:</ul>");
+                this.map = map;
+                this.position = position || new YMaps.ControlPosition(YMaps.ControlPosition.TOP_LEF, new YMaps.Point(40, 77));
+
+                // Выставление необходимых CSS-свойств.
+                this.container.css({
+                    position: "absolute",
+                    zIndex: YMaps.ZIndex.CONTROL,
+                    background: '#fff',
+                    listStyle: 'none',
+                    padding: '10px',
+                    margin: 5,
+                });
+
+                // Формирование списка маршрутов.
+                this._generateList();
+
+                // Позиционирование элемента управления.
+                this.position.apply(this.container);
+
+                // Размещение на карте.
+                this.container.appendTo(this.map.getContainer());
+
+                map.addControl(this.editor);
+            }
+
+            // Удаление с карты.
+            this.onRemoveFromMap = function () {
+                this.container.remove();
+                this.container = this.map = null;
+            };
+
+            // Формирование списка маршрутов.
+            this._generateList = function () {
+                var _this = this;
+
+                // Для каждого объекта вызываем функцию-обработчик.
+                destinations.forEach(function (obj, index) {
+                    // Создание ссылки на объект
+                    var li = YMaps.jQuery("<li><a href=\"#\">" + obj.name + "</a></li>"),
+                        a = li.find("a"); 
+
+                    // Создание обработчика щелчка по ссылке.
+                    li.bind("click", function () {
+                        _this.showRoute(index);
+                        obj.openBalloon();
+                        return false;
+                    });
+
+                // Слушатели событий на открытие и закрытие балуна у объекта.
+                YMaps.Events.observe(obj, obj.Events.BalloonOpen, function () {
+                    a.addClass("active");
+                });
+
+                YMaps.Events.observe(obj, obj.Events.BalloonClose, function () {
+                    a.removeClass("active");
+                });
+
+                // Добавление ссылки на объект в общий список.
+                li.appendTo(_this.container);
+            });
+
+            // Отображает маршрут до места назначения с индексом = index.
+            this.showRoute = function (index) {
+
+                if (!this.cacheRoutes[index]) {
+                    this.routerModel.getRouteProvider().route({ 
+                        wayPoints : [office.getGeoPoint(), destinations.get(index).getGeoPoint()] 
+                    }, successCallback, failureCallback, this);
+                } else {
+                    this.routerModel.setRouterResult(this.cacheRoutes[index]);
+                }
+
+                // Успешное построение маршрута.
+                function successCallback (rr) {
+                    this.cacheRoutes[index] = rr;
+                    this.routerModel.setRouterResult(this.cacheRoutes[index]);
+                }
+
+                // Ошибка при построении маршрута.
+                function failureCallback (rr) {
+                    alert("Во время построения маршрута произошла ошибка:" + rr.error);
+                }
+            };
+        };
+    }
+    </script>
+    <style>
+        .active {
+            text-decoration : none;
+            color : #000;
+            cursor : text;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="YMapsID" style="height:400px; width:600px;"></div>
+</body>
+
+</html>

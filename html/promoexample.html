@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Пример с главной страницы.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        var map, placemark, pl;
+        YMaps.jQuery(function () {
+            map = new YMaps.Map(YMaps.jQuery("#YMapsID"));
+            map.setCenter(new YMaps.GeoPoint(37.616647,55.750803),14);
+            map.addControl(new YMaps.SmallZoom());
+            map.addControl(new YMaps.ToolBar());
+            map.addControl(new YMaps.TypeControl());
+
+            YMaps.Templates.add("example#content", new YMaps.Template(
+                '<div class="content">\
+                    <p>$[description]</p>\
+                    <p><a href="#" onclick="example_$[id]();return false;">Следующий пример</a></p>\
+                </div>'
+            ));
+
+            YMaps.Templates.add("example#content-with-img", new YMaps.Template(
+                '<div class="content">\
+                    <p><img src="http://api.yandex.ru/i/maps/citadel.jpg" alt="" />$[description]</p>\
+                    <p><a href="#" onclick="example_$[id]();return false;">Следующий пример</a></p>\
+                </div>'
+            ));
+            YMaps.Templates.add("example#content-with-typemenu", new YMaps.Template(
+                '<div class="content">\
+                    <p>$[description]</p>\
+                    <ul>\
+                        <li><a href="#" onclick="map.setType(YMaps.MapType.MAP);return false">схема</a></li>\
+                        <li><a href="#" onclick="map.setType(YMaps.MapType.SATELLITE);return false;">спутник</a></li>\
+                        <li><a href="#" onclick="map.setType(YMaps.MapType.HYBRID);return false">гибрид</a></li>\
+                    </ul>\
+                    <p><a href="#" onclick="example_$[id]();return false;">Следующий пример</a></p>\
+                </div>'
+            ));
+
+            YMaps.Templates.add("example#content-doc", new YMaps.Template(
+                '<div class="content">\
+                    <p>А чтобы узнать больше: \
+                        <ul>\
+                            <li>ознакомьтесь с <a href="http://api.yandex.ru/maps/jsapi/examples/">примерами кода</a></li>\
+                            <li>посмотрите как это сделали другие сайты или <a href="http://api.yandex.ru/maps/projects.xml">сервисы Яндекса</a></li>\
+                            <li><a href="http://api.yandex.ru/maps/doc/">посмотрите документацию</a></li>\
+                        </ul>\
+                    </p>\
+                    <p><a href="#" onclick="example_1();return false;">Или снова посмотрите примеры</a></p>\
+                </div>'
+            ));
+
+            YMaps.Styles.add("example#base", {
+                parentStyle : "deafult#greenPoint",
+                balloonContentStyle : {
+                    template : "example#content"
+                }
+            });
+
+            YMaps.Styles.add("example#img", {
+                parentStyle : "deafult#greenPoint",
+                balloonContentStyle : {
+                    template : "example#content-with-img"
+                }
+            });
+
+            YMaps.Styles.add("example#typemenu", {
+                parentStyle : "deafult#greenPoint",
+                balloonContentStyle : {
+                    template : "example#content-with-typemenu"
+                }
+            });
+
+            YMaps.Styles.add("example#doc", {
+                parentStyle : "deafult#greenPoint",
+                balloonContentStyle : {
+                    template : "example#content-doc"
+                }
+            });
+
+            YMaps.Styles.add("example#custom", {
+                parentStyle : "example#base",
+                iconStyle : {
+                    href : "/images/maps/icon_photo.png",
+                    size : new YMaps.Point(18, 29),
+                    offset : new YMaps.Point(-9, -33)
+                },
+                lineStyle : {
+                    strokeColor : "FF000055",
+                    strokeWidth : 5
+                }
+            });
+
+            example_1();
+
+            pl = new YMaps.Polyline([ 
+                new YMaps.GeoPoint(49.107992,55.799188),
+                new YMaps.GeoPoint(49.107381,55.800939),
+                new YMaps.GeoPoint(49.107238,55.801491),
+                new YMaps.GeoPoint(49.107166,55.801743),
+                new YMaps.GeoPoint(49.107777,55.800332),
+                new YMaps.GeoPoint(49.106905,55.801956),
+                new YMaps.GeoPoint(49.105719,55.802027),
+                new YMaps.GeoPoint(49.103815,55.80148),
+                new YMaps.GeoPoint(49.103204,55.800372),
+                new YMaps.GeoPoint(49.10368,55.799441),
+                new YMaps.GeoPoint(49.104022,55.799269),
+                new YMaps.GeoPoint(49.104219,55.798444),
+                new YMaps.GeoPoint(49.105387,55.797468),
+                new YMaps.GeoPoint(49.106294,55.796481),
+                new YMaps.GeoPoint(49.108953,55.797007),
+                new YMaps.GeoPoint(49.10722,55.798854),
+                new YMaps.GeoPoint(49.10801,55.799188)
+            ], {style: "example#custom"});
+            pl.id = 6;
+            pl.description = "Рисовать линии между точками."
+            map.addOverlay(pl);
+        });
+
+        function example_1 () {
+            map.setCenter(new YMaps.GeoPoint(37.616647,55.750803), 14, YMaps.MapType.MAP);
+
+            if (!placemark) {
+                placemark = new YMaps.Placemark(map.getCenter(), { hideIcon:true, style : "example#base" });
+                map.addOverlay(placemark);
+            }
+
+            placemark.closeBalloon();
+            placemark.setGeoPoint(map.getCenter());
+            placemark.setOptions({ hideIcon:true, style : "example#base" });
+
+            placemark.setIconContent("Примеры");
+            placemark.id = 2;
+            placemark.description = "На карту можно поставить одну или много точек.";
+            placemark.update();
+        }
+
+        function example_2 () {
+            map.setCenter(new YMaps.GeoPoint(37.616647,55.750803), 14, YMaps.MapType.SATELLITE);
+
+            placemark.id = 3;
+            placemark.setGeoPoint(map.getCenter());
+            placemark.setStyle("example#typemenu");
+            placemark.description = "Можно выбирать слой подходящий вашему сайту";
+            placemark.update();
+            placemark.openBalloon();
+        }
+
+        function example_3 () {
+            map.setType();
+            map.setCenter(new YMaps.GeoPoint(44.002276,56.328419), 14, YMaps.MapType.MAP);
+            placemark.setGeoPoint(map.getCenter());
+            placemark.setIconContent(null);
+            placemark.setOptions({style:'example#custom', hideIcon:false});
+            placemark.id = 4;
+            placemark.description = "Менять дизайн маркера, используя любую картинку в качестве значка."
+            placemark.update();
+            placemark.openBalloon();
+        }
+
+        function example_4 () {
+            map.setCenter(new YMaps.GeoPoint(39.750694,54.635798));
+            placemark.setGeoPoint(map.getCenter());
+            placemark.setIconContent("Примеры");
+            placemark.id = 5;
+            placemark.setOptions({style:'example#img', hideIcon:true});
+            placemark.description = "Внутри этого всплывающего окна вы можете использовать любой html-код, например, вставить фото или видео."
+            placemark.update();
+            placemark.openBalloon();
+        }
+        
+        function example_5 () {
+            map.setCenter(new YMaps.GeoPoint(49.10109,55.80155), 14);
+            pl.openBalloon();
+        }
+        
+        function example_6 () {
+            map.setCenter(new YMaps.GeoPoint(38.129992,56.310702), 14);
+            placemark.setGeoPoint(map.getCenter());
+            placemark.setOptions({hideIcon:true, style:'example#doc'});
+            placemark.update();
+            placemark.openBalloon();
+        }
+    </script>
+
+    <style type="text/css">
+        /* Общие объявления (начало) */
+
+            html, body, #YMapsID {
+                height : 100%;
+                width : 100%
+            }
+
+            body {
+                margin : 0;
+                padding : 0
+            }
+
+        /* Общие объявления (конец) */
+
+        /* Настройка контента балуна (начало) */
+
+            .content {
+                width : 250px;
+            }
+
+            .YMaps-b-balloon-content ul {
+                padding:0 0 5px 15px;
+            }
+            .YMaps-b-balloon-content p img, .YMaps-b-balloon-content p img {
+                float:left; 
+                padding:0 5px 5px 0;
+            }
+            
+            .YMaps-b-balloon-content p {
+                padding:5px 0;
+            }
+            
+            .clear {
+                clear:both;
+            }
+
+        /* Настройка контента балуна (конец) */
+    </style>
+</head>
+
+<body>
+    <div id="YMapsID"></div>
+</body>
+
+</html>

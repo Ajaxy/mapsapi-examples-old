@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Создание своего тайла.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(), 1);
+
+            // Добавление элементов управления
+            map.addControl(new YMaps.Zoom());
+            map.enableScrollZoom();
+
+            // Создание источника тайлов
+            var myData = new YMaps.TileDataSource("", false, true);
+            myData.getTile = function (tile, zoom) {
+                return new myTile(this);
+            }
+
+            // Установка нового типа карты с пользовательским слоем
+            map.setType(new YMaps.MapType([new YMaps.Layer(myData)], 'ITILE', {minZoom:0, maxZoom:30}));
+
+            // Добавление авториских прав
+            map.addCopyright("© Саша Белый, специально для Клуба разработчиков API Яндекс.Карты");
+        });
+        
+        // Класс пользовательского тайла, реализующий интерфейс YMaps.ITile
+        function myTile (dataSource) {
+            var myPos = new YMaps.Point(),              // Текущая позиция тайла
+                element = YMaps.jQuery("<div/>"),       // Тайл
+                originalSize = new YMaps.Point(256);    // Размер тайла
+
+            // Добавление класса для настройки внешнего вида тайла
+            element.addClass("myTile");
+
+            // Вызывается при добавлении тайла на карту
+            this.onAddToMap = function (map, parentContainer) {
+                element.appendTo(parentContainer);
+            }
+
+            // Вызывается при удалении тайла с карты
+            this.onRemoveFromMap = function () {
+                element.remove();
+            }
+
+            //  Устанавливает тайл в заданную позицию
+            this.setPosition = function (position) {
+                myPos.moveTo(position);
+                element.css({
+                    left: myPos.x,
+                    top: myPos.y
+                });
+            }
+
+            // Возвращает текущую позицию тайла (в пикселах)
+            this.getPosition = function () {
+                return myPos.copy();
+            }
+
+            // Загружает тайл с заданным номером при заданном коэффициенте масштабирования
+            this.load = function (tile, zoom) {
+                element
+                    .html("<span>" + tile + "</span>")
+                    .removeClass("Error");
+            }
+
+            // Отображает тайл ошибки
+            this.error = function () {
+                element
+                    .html("<span>нет данных</span>")
+                    .addClass("myTile Error");
+            }
+
+            // Останавливает загрузку. Если тайл не загрузился, отображает тайл ошибки
+            this.abort = function () {
+            }
+
+            // Масштабирует тайл
+            this.scale = function (coeff) {
+                var newSize = originalSize.copy().scale(coeff);
+                element.css({
+                    width: newSize.x,
+                    height: newSize.y
+                });
+            }
+        }
+    </script>
+
+    <style type="text/css">
+        /* Внешний вид тайла (начало)*/
+
+            .myTile {
+                position: absolute;
+
+                width: 256px;
+                height: 256px;
+
+                border-collapse: collapse;
+
+                background: #FFF;
+                border: solid 1px #000;
+            }
+
+        /* Внешний вид тайла (конец)*/
+
+        /* Сообщение в тайле (начало)*/
+
+            .myTile span {
+                position:absolute;
+                top:50%;
+
+                text-align: center;
+
+                width: 100%;
+                margin-top: -0.5em;
+            }
+
+        /* Сообщение в тайле (начало)*/
+
+        /* Внешний вид тайла об ошибке (начало)*/
+
+            .myTile.Error {
+                background: #ec7272;
+                color: #FFF;
+            }
+
+        /* Внешний вид тайла об ошибке (конец)*/
+    </style>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:1000px;height:800px"></div>
+</body>
+
+</html>

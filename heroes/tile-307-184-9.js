@@ -1,0 +1,1 @@
+YMaps.Hotspots.Loader.onLoad("heroes-307-184-9",{"objects":[{"data":{"name":"\u041a\u0435\u0440\u0447\u044c","Point":{"pos":"36.464342 45.30667"},"style":"#hero"},"base":new YMaps.GeoPoint(36.464342,45.30667),"geometry":[[-10,-5,10,33]]}]});

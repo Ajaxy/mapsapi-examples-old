@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Пользовательские координатные системы. Карта дна Черного моря.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        YMaps.jQuery(function () {
+                // Создаем декартову систему координат:
+            var myCoordSystem = new YMaps.CartesianCoordSystem(
+                    new YMaps.Point(26.94, 38.39),  // координаты левого нижнего угла
+                    new YMaps.Point(43.25, 50.36),  // координаты правого верхнего угла
+                    new YMaps.Point(77180, 111100), // масштаб
+                    4                               // максимальный уровень масштаба, считая с 0
+                ),
+
+                // Создаем карту
+                map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0], {
+                    coordSystem: myCoordSystem // передаем нашу систему координат
+                }),
+
+                // Создаем собственный источник тайлов
+                myData = new YMaps.TileDataSource("/i/maps/tiles/black_sea/", false, true),
+
+                // Создаем собственный тип карты
+                myType = new YMaps.MapType(["blacksea"], "Рельеф", {textColor: "#706f60", minZoom:0, maxZoom: 3}),
+
+                // Создаем миникарту
+                miniMap = new YMaps.MiniMap();
+
+            // Указываем правило получения URL картинки по тайловым координатом и уровню масштаба
+            myData.getTileUrl = function (tile, zoom) {
+                return this.getTileUrlTemplate() + "tile-" + zoom + "-" + tile.x + "-" + tile.y + ".png";
+            }
+
+            // Добавим в список слоев новый слой, использующий наш источник данных
+            YMaps.Layers.add("blacksea", function () { return new YMaps.Layer(myData) });
+
+            // Выставим карте и миникарте наш тип
+            map.setType(myType);
+            miniMap.setType(myType);
+
+            // Добавим миникарту
+            map.addControl(miniMap);
+
+            // Добавим панель инструментов и ползунок масштаба
+            map.addControl(new YMaps.ToolBar());
+            map.addControl(new YMaps.Zoom({ noTips: true }));
+
+            // Выставим центр карты и масштаб
+            map.setCenter(new YMaps.Point(33.6,44.6), 1);
+
+            // Включим масштабирование колесом мыши
+            map.enableScrollZoom();
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="height: 600px; width: 900px;"></div> 
+</body>
+
+</html>

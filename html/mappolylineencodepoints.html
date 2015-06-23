@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Кодирование координат точек ломанной.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Добавление элементов управления
+            map.enableScrollZoom();
+            map.addControl(new YMaps.Zoom());
+            map.addControl(new YMaps.SearchControl());
+            map.addControl(new YMaps.TypeControl());
+            map.addControl(new YMaps.ToolBar());
+
+            // Создание ломанной
+            var polyline = new YMaps.Polyline();
+            map.addOverlay(polyline);
+
+            // Включение режима редактирования
+            polyline.startEditing();
+
+            // При щелчке на карте добавляем новую точку в конец ломанной
+            YMaps.Events.observe(map, map.Events.Click, function (map, mEvent) {
+                polyline.addPoint(mEvent.getGeoPoint());
+            });
+
+            // Обновляем содержимое текстовых полей с координатыми точек
+            YMaps.Events.observe(polyline, polyline.Events.PositionChange, function () {
+                YMaps.jQuery("#Points").html(polyline.getPoints().join('\n'));
+                YMaps.jQuery("#encodePoints").attr('value', encodePoints(polyline.getPoints()));
+            });
+        });
+
+        // Кодирование точек ломанной
+        function encodePoints (points) {
+            var array = [],                     // Временный массив для точек
+                prev = new YMaps.Point(0,0),    // Предыдущая точка
+                coef = 1000000;                 // Коэффициент
+
+            // Обработка точек
+            for (var i = 0, geoVector, currentPoint; i < points.length; i++) {
+                currentPoint = points[i].copy();
+
+                // Нахождение смещение относительно предыдущей точки
+                geoVector = currentPoint.diff(prev).neg();
+
+                // Умножение каждой координаты точки на коэффициент и кодирование
+                array = array.concat(Base64.encode4bytes(geoVector.getX() * coef), Base64.encode4bytes(geoVector.getY() * coef));
+                prev = currentPoint;
+            }
+
+            // Весь массив кодируется в Base64
+            return Base64.encode(array);
+        }
+
+        // Класс для работы с Base64
+        // За основу взят класс с http://www.webtoolkit.info/
+        var Base64 = new function () {
+            var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=";
+
+            this.encode4bytes = function (x) {
+                var chr = [];
+                for (var i = 0; i < 4; i++) {
+                    chr[i] = x & 0x000000ff;
+                    x = x >> 8;
+                }
+                return chr;
+            }
+
+            this.encode = function (input) {
+                var output = "",
+                    chr1, chr2, chr3, enc1, enc2, enc3, enc4,
+                    i = 0,
+                    inputIsString = typeof input == "string";
+
+                while (i < input.length) {
+                    chr1 = input[i++];
+                    chr2 = input[i++];
+                    chr3 = input[i++];
+                    
+                    enc1 = chr1 >> 2
+                    enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+                    enc3 = ((chr2 & 15) << 2) | (chr3 >> 6)
+                    enc4 = chr3 & 63;
+                    
+                    if (isNaN(chr2)) {
+                        enc3 = enc4 = 64;
+                    } else if (isNaN(chr3)) {
+                        enc4 = 64;
+                    }      
+
+                    output +=
+                        _keyStr.charAt(enc1) + _keyStr.charAt(enc2) +
+                        _keyStr.charAt(enc3) + _keyStr.charAt(enc4);
+                        
+                }
+
+                return output;
+            }
+        }
+    </script>
+
+    <style type="text/css">
+        /* Общие объявления (начало)*/
+
+            body {
+                font-family: Arial;
+                font-size: 0.9em;
+            }
+
+        /* Общие объявления (конец)*/
+
+        /* Таблица для выравнивания элементов (начало)*/
+
+            .l-tool-table {
+                width: 910px;
+            }
+
+            .coord {
+                width: 20%;
+                padding-left: 1em
+            }
+
+        /* Таблица для выравнивания элементов (конец)*/
+
+        /* Контейнер для карты (начало)*/
+
+            #YMapsID {
+                width: 100%;
+                height: 30em
+            }
+
+        /* Контейнер для карты (конец)*/
+
+        /* Оформление результатов (начало)*/
+
+            .title {
+                font-weight: bold;
+            }
+            
+            .points {
+                width: 20em;
+                height: 27.5em;
+                margin-top:1em;
+            }
+            
+            .encode-points {
+                width: 905px;
+            }
+
+        /* Оформление результатов (конец)*/
+    </style>
+</head>
+
+<body>
+    <table class="l-tool-table">
+    <tr>
+        <td class="map">
+            <div id="YMapsID"></div>
+        </td>
+        <td class="coord">
+            <div class="title">Координаты точек ломанной</div>
+            <textarea id="Points" class="points" readonly="readonly"></textarea>
+        </td>
+    </tr>
+    </table>
+    
+    <p class="title">Закодированные точки для метода <a target="blank" href="http://api.yandex.ru/maps/doc/jsapi/1.x/ref/reference/polyline.xml#.fromEncodedPoints">fromEncodedPoints()</a></p>
+    <input id="encodePoints" class="encode-points" type="text" readonly="readonly"/>
+</body>
+
+</html>

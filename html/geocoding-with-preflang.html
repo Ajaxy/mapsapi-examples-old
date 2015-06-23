@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Использование параметра prefLang при геокодировании.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+                // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]),
+                
+                // Результат поиска
+                geoResult;
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Поиск по нажатию Enter в поисковом поле
+            YMaps.jQuery("#request").bind("keyup", function (e) {
+                if (e.keyCode == 13) {
+                    search();
+                }
+            });
+
+            // Поиск по щелчку на кнопке "Искать"
+            YMaps.jQuery("#search").bind("click", search);
+
+            function search () {
+                // Запускаем поиск
+                var geocoder = new YMaps.Geocoder(YMaps.jQuery("#request").attr("value"), { 
+                    prefLang : YMaps.jQuery("#lang").val()
+                } );
+
+                var listenerLoad = YMaps.Events.observe(geocoder, geocoder.Events.Load, function (geocoder) {
+                    // Если результа геокодирования был добавлен на карту, то удалим его
+                    if (geoResult) {
+                        map.removeOverlay(geoResult);
+                    }
+                    
+                    if (geocoder.length()) {
+                        // Отображаем первый релевантный результат геокодирования
+                        geoResult = geocoder.get(0);
+                        map.addOverlay(geoResult);
+                        geoResult.openBalloon();
+
+                        // Центрируем карту по найденному объекту
+                        map.setBounds(geoResult.getBounds());
+                    } else {
+                        alert("По вашему запросу ничего не найдено.");
+                    }
+
+                    listenerLoad.cleanup();
+                });
+            }
+
+        })
+    </script>
+    <style type="text/css">
+        body {
+            margin : 0;
+            padding : 20px;
+        }
+
+        .b-search-panel {
+            border-collapse : collapse;
+        }
+
+            .b-search-panel td {
+                padding : 0;
+            }
+
+        .b-search-input {
+            width : 500px;
+            padding : 3px;
+            margin-right : 10px;
+        }
+
+        .b-search-lang {
+            padding : 3px;
+            margin-right : 10px;
+        }
+
+        .b-search-button {
+            padding : 2px 3px;
+        }
+
+        .b-map {
+            width : 100%;
+            height : 500px;
+            margin-top: 10px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <table class="b-search-panel">
+    <tr>
+        <td><input id="request" class="b-search-input" type="text" value="Киев, площадь Независимости"/></td>
+        <td>
+            <select id="lang" class="b-search-lang">
+                <option value="ru">ru</option>
+                <option value="uk" selected="selected">uk</option>
+
+                <option value="be">be</option>
+            </select>
+        </td>
+        <td><input id="search" class="b-search-button" type="button" value="Искать"/></td>
+    </tr>
+    <tr>
+        <td colspan="3"><div id="YMapsID" class="b-map"></div></td>
+    </tr>
+
+    </table>
+</body>
+
+</html>

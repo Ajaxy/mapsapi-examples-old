@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+    <Document>
+        <Style id="stadionIcon">
+            <IconStyle>
+                <Icon>
+                    <href>http://api-maps.yandex.ru/i/0.4/icons/stadium.png</href>
+                </Icon>
+            </IconStyle>
+            <BalloonStyle>
+                <bgColor>ffffffbb</bgColor>
+                <text><![CDATA[
+                    <div style="font-size: 1.2em">$[name]</div>
+                    <div>$[description]</div>
+                ]]></text>
+            </BalloonStyle>
+        </Style>
+
+        <Style id="skatingIcon">
+            <IconStyle>
+                <Icon>
+                    <href>http://api-maps.yandex.ru/i/0.4/icons/skating.png</href>
+                </Icon>
+            </IconStyle>
+        </Style>
+
+        <Folder>
+            <name>Несколько спортивных сооружений</name>
+            <styleUrl>#stadionIcon</styleUrl>
+
+            <Placemark>
+                <name>Арена Химки</name>
+                <description><![CDATA[Московская обл., Химки, Кирова ул., 24]]></description>
+                <Point>
+                    <coordinates>37.454121,55.885055,0</coordinates>
+                </Point>
+            </Placemark>
+
+            <Placemark>
+                <name>Метеор</name>
+                <description><![CDATA[Москва, Генерала Ермолова ул., 1]]></description>
+                <Point>
+                    <coordinates>37.513422, 55.739934,0</coordinates>
+                </Point>
+            </Placemark>
+
+            <Placemark>
+                <name>Вымпел</name>
+                <description><![CDATA[Москва, шоссе Измайловское, владение 73]]></description>
+                <Point>
+                    <coordinates>37.754008, 55.790155,0</coordinates>
+                </Point>
+            </Placemark>
+
+            <Placemark>
+                <name>Крылья Советов</name>
+                <styleUrl>#skatingIcon</styleUrl>
+                <description><![CDATA[Москва, Буденного просп., 17]]></description>
+                <Point>
+                    <coordinates>37.724966, 55.774294</coordinates>
+                </Point>
+            </Placemark>
+
+            <Placemark>
+                <name>Бассейн Медынский</name>
+                <Style>
+                    <IconStyle>
+                        <Icon>
+                            <href>http://api-maps.yandex.ru/i/0.4/icons/swimming.png</href>
+                        </Icon>
+                    </IconStyle>
+                </Style>
+                <description><![CDATA[Москва, Медынская ул., 9а, строение 2]]></description>
+                <Point>
+                    <coordinates>37.651466, 55.581897</coordinates>
+                </Point>
+            </Placemark>
+        </Folder>
+
+        <Placemark>
+            <name>extruded</name>
+            <description><![CDATA[This is an image <img src="http://icon.jpg" /> and we have a link http://www.google.com.]]></description>
+            <styleUrl>#linestyleExample</styleUrl>
+            <LineString>
+                <extrude>1</extrude>
+                <tessellate>1</tessellate>
+                <altitudeMode>relativeToGround</altitudeMode>
+                <coordinates>-122.364167,37.824787,50 -122.363917,37.824423,50</coordinates>
+            </LineString>
+        </Placemark>
+
+        <Placemark>
+            <name>Часть Москвы</name>
+            <Style>
+                <LineStyle>
+                    <color>ff156d00</color>
+                    <width>4</width>
+                </LineStyle>
+
+                <PolyStyle>
+                    <color>7f00ff00</color>
+                </PolyStyle>
+            </Style>
+            <LinearRing>
+                <coordinates>
+                    37.725742,55.881768,0 
+                    37.650897,55.832333,0 
+                    37.640598,55.818419,0 
+                    37.633731,55.773548,0 
+                    37.645404,55.770839,0 
+                    37.674243,55.783223,0 
+                    37.690036,55.791348,0 
+                    37.750461,55.801405,0 
+                    37.788913,55.809526,0 
+                    37.837665,55.815326,0 
+                    37.832172,55.828855,0 
+                    37.725742,55.881768,0
+                    37.725742,55.881768,0 
+                </coordinates>
+            </LinearRing>
+        </Placemark>
+
+        <Placemark>
+            <name>Пример ломаной</name>
+            <Style>
+                <LineStyle>
+                    <color>c8ff6c00</color>
+                    <width>4</width>
+                </LineStyle>
+            </Style>
+            <LineString>
+                <coordinates>
+                    37.49702,55.610561,0 
+                    37.531352,55.646302,0 
+                    37.579418,55.689768,0 
+                    37.583538,55.707606,0 
+                    37.550579,55.707606,0 
+                    37.598644,55.734735,0
+                </coordinates>
+            </LineString>
+        </Placemark>
+    </Document>
+</kml>

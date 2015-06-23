@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Создание области показа для группы объектов.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 1);
+            
+                // Набор точек
+            var points = [
+                    new YMaps.GeoPoint(37.62254,55.728971),  // метро Добрынинская
+                    new YMaps.GeoPoint(37.648986,55.76881),  // метро Красные ворота
+                    new YMaps.GeoPoint(37.596956,55.769302)  // метро Маяковская
+                ],
+
+                // Создаем область показа по группе точек
+                bounds = new YMaps.GeoCollectionBounds(points);
+
+            // Применяем область показа к карте
+            map.setBounds(bounds);
+
+            // Добавляем метки на карту
+            for (var i = 0, l = points.length; i < l; i++) {
+                map.addOverlay(new YMaps.Placemark(points[i]));
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:400px"></div>
+</body>
+
+</html>

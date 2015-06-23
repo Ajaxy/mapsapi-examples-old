@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Множественное геокодирование.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 4);
+
+            // Координаты или адреса географических объектов
+            var data = ["Москва", "Санкт-Петербург", "Екатеринбург", "Киев", "Одесса", "Сиферополь"];
+
+            var geocoder = new MultiplyGeocoder(data);
+            map.addOverlay(geocoder);
+
+            YMaps.Events.observe(geocoder, "Load", function (geocoder) {
+                alert("Геокодирование завершено");
+            });
+        });
+
+        // Реализует наследование прототипа без исполнения конструктора родителя
+        // Подробнее о наследовании: http://javascript.ru/tutorial/object/inheritance
+        function extend (child, parent) {
+            var c = function () {};
+            c.prototype = parent.prototype;
+            c.prototype.constructor = parent;
+            return child.prototype = new c;
+        };
+
+        // Множественный геокодер
+        // requests - массив адресов
+        function MultiplyGeocoder (requests) {
+
+            // Вызов родительского конструктора
+            YMaps.GeoObjectCollection.call(this);
+
+            var _this = this,
+
+                // Количество вызовов геокодера
+                geocodeCallCount = 0,
+
+                // Обработчики событий
+                listeners = [];
+
+            // Последовательно геокодируем все переданные адреса
+            for (var i = 0, l = requests.length; i < l; i++) {
+                geocode(requests[i]);
+            }
+
+            // Функция, отвечающая за геокодировании одного адреса
+            function geocode (request) {
+                // Геокодируем
+                var geocoder = new YMaps.Geocoder(request);
+           
+                // Счетчик вызовов геокодирования увеличиваем
+                geocodeCallCount++;
+
+                // Сохраняем ссылки на обработчики событий
+                listeners = listeners.concat(
+
+                    // Обработка событий Load и Fault
+                    YMaps.Events.observe(geocoder, [geocoder.Events.Load, geocoder.Events.Fault], function (geocoder) {
+                        if (geocoder.length()) {
+                            _this.add(geocoder.get(0));
+                        }
+                        geocodeCallCount--;
+                        isFinish();
+                    })
+                );
+            }
+
+            // Функция для проверки окончания процесса геокодирования
+            function isFinish () {
+                // Если все объекты сгеокодированы, то генерируем событие завершения
+                if (!geocodeCallCount) {
+
+                    // Событие о завершении геокодирования
+                    YMaps.Events.notify(_this, "Load", _this);
+
+                    // Удаление обработчиков событий
+                    for (var i = 0, l = listeners.length; i < l; i++) {
+                        listeners[i].cleanup();
+                    }
+                }
+            }
+        }
+
+        var ptp = extend(MultiplyGeocoder, YMaps.GeoObjectCollection);
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:700px;height:600px"></div>
+</body>
+
+</html>

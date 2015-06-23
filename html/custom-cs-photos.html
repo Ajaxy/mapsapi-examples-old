@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Пользовательские координатные системы. Просмотр фотографий.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>    
+    <script>
+        YMaps.jQuery(function () {
+            // Первым параметром конструктора следует передать шаблон имени тайла;
+            // в нашем случае мы просто укажем URL папки, в которой находятся подготовленные тайлы
+            var myData = new YMaps.TileDataSource("/i/maps/tiles/photo/", 0, 1);
+
+            // Указываем правило получения URL тайла по тайловым координатом (номеру) и уровню масштаба
+            // В нашем случае имена картинок имеют вид "tile-z-x-y.png",
+            // где z - уровень масштаба, (x, y) - номер тайла (тайловые координаты)
+            myData.getTileUrl = function (tile, zoom) {
+                return this.getTileUrlTemplate() + "tile-" + zoom + "-" + tile.x + "-" + tile.y + ".png";
+            }
+     
+            var myLayer = function () {
+                return new YMaps.Layer(myData);
+            };
+     
+            // Первый параметр - уникальный ключ нашего слоя
+            YMaps.Layers.add("my#photo", myLayer);
+
+            // Создаем собственный тип карты
+            var myType = new YMaps.MapType(["my#photo"], "Фотография");
+
+            var myCoordSystem = new YMaps.CartesianCoordSystem(
+                    new YMaps.Point(0, 4096),   // координаты левого нижнего угла
+                    new YMaps.Point(4096, 0),   // координаты правого верхнего угла
+                    8.5e-5,                     // этот параметр показывает, скольким метрам соответствует один пиксель на фотографии
+                    4                           // максимальный уровень масштаба, считая с 0
+                );
+
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0], {
+                coordSystem: myCoordSystem // передаем нашу систему координат
+            });
+
+            // добавим на карту копирайт
+            map.addCopyright("© Олег Карпов");
+
+            // выставляем центр, уровень масштаба и тип карты
+            map.setCenter(new YMaps.Point(2048, 2048), 1, myType);
+
+            // включаем масштабирование колесом мыши
+            map.enableScrollZoom();
+        });
+    </script> 
+</head> 
+<body> 
+    <div id="YMapsID" style="height: 600px; width: 900px;"></div> 
+</body> 

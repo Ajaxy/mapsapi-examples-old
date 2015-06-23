@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Создание пользовательского оверлея.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        var map, 
+            stations = [{point: new YMaps.GeoPoint(37.579762, 55.775981), name:"Белорусский вокзал"},
+                        {point: new YMaps.GeoPoint(37.658032, 55.773732), name:"Казанский вокзал"}, 
+                        {point: new YMaps.GeoPoint(37.565632, 55.742767), name:"Киевский вокзал"},
+                        {point: new YMaps.GeoPoint(37.662722, 55.755327), name:"Курский вокзал"}, 
+                        {point: new YMaps.GeoPoint(37.653658, 55.778598), name:"Ленинградский вокзал"},
+                        {point: new YMaps.GeoPoint(37.640426, 55.728515), name:"Павелецкий вокзал"}, 
+                        {point: new YMaps.GeoPoint(37.632116, 55.793227), name:"Рижский вокзал"},
+                        {point: new YMaps.GeoPoint(37.588557,55.796101), name:"Савеловский вокзал"}, 
+                        {point: new YMaps.GeoPoint(37.656083, 55.778644), name:"Ярославский вокзал"}];
+
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.62, 55.763),13);
+
+            // Добавление элементов управления
+            map.addControl(new YMaps.TypeControl());
+            map.enableScrollZoom();
+
+            // Добавление оверлеев на карту
+            for (var i = 0; i < stations.length; i++) {
+                map.addOverlay(createOverlay(stations[i]))
+            }
+        });
+
+        // Функция для создания оверлея и ссылки на него
+        function createOverlay (station)  {
+            var link = YMaps.jQuery("<a href=\"#\">" + station.name + "</a>"), // Создание ссылки
+                newOverlay = new SimpleOverlay(station.point, station.name, link); // Создание оверлея
+
+            // Установка обработчика кликов по ссылке
+            link
+                .bind("click", function () {
+                    if (link.hasClass("active")) return;
+                    newOverlay.openBalloon();
+                    return false;
+                })
+                .appendTo(YMaps.jQuery("#links"))
+
+            return newOverlay;
+        }
+        
+        // Класс пользовательского оверлея, реализующего класс YMaps.IOverlay
+        function SimpleOverlay (geoPoint, name, link) {
+            var map, _this = this, offset = new YMaps.Point(-10, -29);
+
+            // Вызывается при добавления оверлея на карту 
+            this.onAddToMap = function (pMap, parentContainer) {
+                map = pMap;
+                getElement().appendTo(parentContainer);
+                this.onMapUpdate();
+            };
+
+            // Вызывается при удаление оверлея с карты
+            this.onRemoveFromMap = function () {
+                if (getElement().parent()) {
+                    getElement().remove();
+                }
+            };
+
+            // Вызывается при обновлении карты
+            this.onMapUpdate = function () {
+                // Смена позиции оверлея
+                var position = map.converter.coordinatesToMapPixels(geoPoint).moveBy(offset);
+                getElement().css({
+                    left : position.x,
+                    top :  position.y
+                })
+            };
+
+            // Метод для открытия балуна
+            this.openBalloon = function () {
+                // Делаем ссылку, связанную с оверлеем, активной
+                link.addClass("active");
+
+                // Скрываем оверлей
+                getElement().css("display", "none");
+
+                // Открываем балун и по закрытию балуна возвраем в первоначальный вид
+                map.openBalloon(geoPoint, name, {onClose: function () {
+                    link.removeClass("active");
+                    getElement().css("display", "");
+                }});
+            };
+
+            // Получить ссылку на DOM-ноду оверлея
+            function getElement () {
+                var element = YMaps.jQuery("<div class=\"overlay\"/>");
+
+                // Устанавливаем z-index как у метки
+                element.css("z-index", YMaps.ZIndex.Overlay);
+
+                // При щелчке на оверлеи открывается балун
+                element.bind("click", function () {
+                    _this.openBalloon();
+                });
+
+                // После первого вызова метода, он переопределяется, 
+                // чтобы дважды не создавать DOM-ноду
+                return (getElement = function () {return element})();
+            }
+        }
+        
+        
+    </script>
+
+    <style>
+        /* Общие объявления (начало) */
+
+            html, body {
+                width:100%;
+                height:100%;
+                margin:0;
+                padding:0
+            }
+
+        /* Общие объявления (конец) */
+
+        /* Внешний вид оверлея (начало) */
+
+            .overlay {
+                position: absolute;
+                z-index: 1;
+
+                width: 18px;
+                height: 29px;
+
+                background: url(http://api.yandex.ru/images/maps/ymapsml/examples/icon_station.png);
+                cursor:pointer;
+            }
+
+        /* Внешний вид оверлея (конец) */
+
+        /* Контейнер для карты (начало) */
+
+            #YMapsID {
+                height:100%; 
+                width:70%;
+                float:left;
+            }
+
+        /* Контейнер для карты (конец) */
+
+        /* Ссылки на оверлеи (начало) */
+
+            #info {
+                height:100%; 
+                width:30%;
+                float:right;
+            }
+
+            #info > div {
+                padding-left:30px;
+            }
+
+            #links a{
+                display:block;
+                
+                width: 90%;
+                margin-bottom:10px;
+            }
+            
+            a.active {
+                text-decoration: none;
+                color: #000;
+            }
+
+        /* Ссылки на оверлеи (начало) */
+    </style>
+</head>
+
+<body>
+    <div id="YMapsID"></div>
+    <div id="info">
+        <div id="links">
+            <h2>Вокзалы Москвы</h2>
+        </div>
+    </div>
+</body>
+</html>

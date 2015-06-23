@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Примеры. Ломанная линия со стрелочками.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://api-maps.yandex.ru/1.1/index.xml?key=ANpUFEkBAAAAf7jmJwMAHGZHrcKNDsbEqEVjEUtCmufxQMwAAAAAAAAAAAAvVrubVT4btztbduoIgTLAeFILaQ==" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Создание обработчика для события window.onLoad
+        YMaps.jQuery(function () {
+            // Создание экземпляра карты и его привязка к созданному контейнеру
+            var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+
+            // Установка для карты ее центра и масштаба
+            map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
+
+            // Включение масштабирование колесиком мыши
+            map.enableScrollZoom();
+
+            // Создание стиля
+            var style = new YMaps.Style("default#greenPoint");
+            style.polygonStyle = new YMaps.PolygonStyle();
+            style.polygonStyle.fillColor = "ff0000ff";
+            style.lineStyle = new YMaps.LineStyle();
+            style.lineStyle.strokeColor = "ff0000ff";
+            style.lineStyle.strokeWidth = 3;
+            YMaps.Styles.add("style#Example", style);
+
+            // Создание ломанной со стрелочкам
+            var polyline = new PolylineWithArrows([ 
+                new YMaps.GeoPoint(37.600963,55.575358), new YMaps.GeoPoint(37.508095,55.596356), new YMaps.GeoPoint(37.435574,55.66045),
+                new YMaps.GeoPoint(37.414553,55.685285), new YMaps.GeoPoint(37.385385,55.713877), new YMaps.GeoPoint(37.369431,55.745985),
+                new YMaps.GeoPoint(37.369952,55.76645), new YMaps.GeoPoint(37.376554,55.794178), new YMaps.GeoPoint(37.397018,55.835862),
+                new YMaps.GeoPoint(37.392517,55.849757), new YMaps.GeoPoint(37.400378,55.864414), new YMaps.GeoPoint(37.446695,55.882156),
+                new YMaps.GeoPoint(37.478774,55.88562), new YMaps.GeoPoint(37.536023,55.907798), new YMaps.GeoPoint(37.590731,55.910397),
+                new YMaps.GeoPoint(37.641432,55.897044), new YMaps.GeoPoint(37.704493,55.89294), new YMaps.GeoPoint(37.835378,55.827924),
+                new YMaps.GeoPoint(37.846571,55.77758),  new YMaps.GeoPoint(37.830249,55.685899), new YMaps.GeoPoint(37.842627,55.655717),
+                new YMaps.GeoPoint(37.766432,55.605648), new YMaps.GeoPoint(37.687812,55.574365), new YMaps.GeoPoint(37.600963,55.575358)
+            ], {style: "style#Example"});
+
+            // Добавление ломанной на карту
+            map.addOverlay(polyline);
+        })
+
+        // Реализует наследование прототипа без исполнения конструктора родителя
+        // Подробнее о наследовании: http://javascript.ru/tutorial/object/inheritance
+        function extend (child, parent) {
+            var c = function () {};
+            c.prototype = parent.prototype;
+            c.prototype.constructor = parent;
+            return child.prototype = new c();
+        };
+
+        // Ломанная со стрелочками
+        // Наследуемся от YMaps.Polyline
+        function PolylineWithArrows (points, options) {
+            // Вызов родительского конструктора
+            YMaps.Polyline.call(this, points, options);
+
+            // Группа, в которой содержатся стрелочки
+            var arrows = new YMaps.GeoObjectCollection(this.getComputedStyle()),
+            
+                // Слушатель событий ломанной
+                listener;
+
+            // Вызывается при добавлении объекта на карту
+            this.onAddToMap = function (map, mapContainer) {
+                YMaps.Polyline.prototype.onAddToMap.call(this, map);
+                
+                // При изменении позиции точки ломанной перерисовываем стрелочки
+                listener = YMaps.Events.observe(this, this.Events.PositionChange, function () {
+                    this.updateArrows();
+                }, this);
+                
+                // Добавлении группы со стрелочками на карту
+                map.addOverlay(arrows);
+
+                // Добавление стрелочек на ломанную
+                this.updateArrows();
+            }
+
+            // Вызывается при удалении объекта с карты
+            this.onRemoveFromMap = function () {
+                // Удаление стрелочек с карты
+                this.getMap().removeOverlay(arrows);
+
+                // Удаление ломанной с карты
+                YMaps.Polyline.prototype.onRemoveFromMap.call(this);
+
+                // Удаление обработчика событий
+                listener.cleanup();
+            }
+
+            // Вызывается при обновлении карты
+            this.onMapUpdate = function () {
+                // Обновление ломанной на карте
+                YMaps.Polyline.prototype.onMapUpdate.call(this);
+
+                // Перерисовка стрелочек
+                this.updateArrows();
+            }
+            
+            // Добавляет стрелочки для ломанной
+            this.updateArrows = function () {
+                // Толщина ломанной
+                var lineWidth = this.getComputedStyle().lineStyle.strokeWidth,
+
+                    // Длина стрелочки
+                    arrowWidth = lineWidth * 10;
+
+                // Удаление стрелочек, если они были
+                arrows.removeAll();
+
+                for (var i = 0, prev, current, points = this.getPoints(); i < points.length; i++) {
+
+                    // Пиксельные кординаты
+                    current = this.getMap().converter.coordinatesToLocalPixels(points[i]);
+                    if (prev) {
+                        // Вектор
+                        var vector = current.diff(prev),
+
+                            // Длина вектора
+                            length = Math.sqrt(vector.getX() * vector.getX() + vector.getY() * vector.getY()),
+
+                            // Единичный вектор
+                            normal = vector.scale(1 / length);
+
+                        // Если длина вектора больше стрелочки в 2 раза, то рисуем стрелочку
+                        if (length > arrowWidth) {
+                            // Середина отрезка
+                            var middle = current.diff(prev.neg()).neg().scale(1/2);
+
+                                // Отступ от сердины
+                                offsetMiddle = normal.scale(-arrowWidth / 2),
+
+                                // Перпендикуляры к сегменту ломанной
+                                arrowPart1 = new YMaps.Point(0 - offsetMiddle.getY(), offsetMiddle.getX()).scale(0.4),
+                                arrowPart2 = new YMaps.Point(offsetMiddle.getY(), 0 - offsetMiddle.getX()).scale(0.4),
+
+                                // Точки для рисования стрелочки
+                                arrowPoint1 = middle.diff(offsetMiddle).diff(arrowPart1.neg()),
+                                arrowPoint2 = middle.diff(offsetMiddle).diff(arrowPart2.neg());
+
+                            // Добавляем стрелочку
+                            arrows.add(new YMaps.Polygon([
+                                this.getMap().converter.localPixelsToCoordinates(middle),
+                                this.getMap().converter.localPixelsToCoordinates(arrowPoint1),
+                                this.getMap().converter.localPixelsToCoordinates(arrowPoint2)
+                            ]));
+                        }
+                    }
+                    prev = current;
+                }
+            };
+        }
+        var ptp = extend(PolylineWithArrows, YMaps.Polyline);
+    </script>
+</head>
+
+<body>
+    <div id="YMapsID" style="width:600px;height:600px"></div>
+</body>
+
+</html>
