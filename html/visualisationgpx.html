@@ -14,7 +14,7 @@
             map.setCenter(new YMaps.GeoPoint(37.64, 55.76), 10);
 
             // Загрузка GPX-трека и добавление его на карту
-            var gpx = new YMaps.GPX("http://api.yandex.ru/maps/doc/jsapi/1.x/examples/gpx/demonstration.xml");
+            var gpx = new YMaps.GPX("gpx/demonstration.xml");
             map.addOverlay(gpx);
 
             // Обработчик неудачной загрузки KML

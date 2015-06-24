@@ -29,7 +29,7 @@
             var user = new YMaps.Placemark(map.getCenter(), {
                 style : {
                     iconStyle : {
-                        href : "http://api.yandex.ru/i/maps/people.gif",
+                        href : "https://api.yandex.ru/i/maps/people.gif",
                         size : new YMaps.Point(18, 40),
                         offset : new YMaps.Point(-7, -25)
                     }
@@ -53,7 +53,7 @@
             });
 
             // Загрузка данных
-            var ml = new YMaps.YMapsML("http://maps.yandex.ru/export/usermaps/k1f56FwZOOeUGqK5I6A1vPAiePTnx1W-/", {viewAutoApply : false});
+            var ml = new YMaps.YMapsML("https://maps.yandex.ru/export/usermaps/k1f56FwZOOeUGqK5I6A1vPAiePTnx1W-/", {viewAutoApply : false});
             map.addOverlay(ml);
             YMaps.Events.observe(ml, ml.Events.Load, function (ml) {
                 setActivePoints(ml);

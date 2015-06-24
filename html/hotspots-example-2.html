@@ -36,7 +36,7 @@
             // Переопределим функцию получения содержимого балуна
             ptp.requestBalloonData = function (callback, e, shape) {
                     // В балуне в отдельном фрейме покажем страницу Википедии с информацией о городе
-                var data = '<iframe style="width: 850px; height: 550px;" src="http://ru.wikipedia.org/wiki/' + this.getData().name + '"/>',
+                var data = '<iframe style="width: 850px; height: 550px;" src="https://ru.wikipedia.org/wiki/' + this.getData().name + '"/>',
                     // Вычислим точку, в которой необходимо открыть балун.
                     // Прибавим к верхнему левому углу фигуры смещение (10, 5).
                     pixelCenter = new YMaps.Point(shape.getMinX() + 10, shape.getMinY() + 5),

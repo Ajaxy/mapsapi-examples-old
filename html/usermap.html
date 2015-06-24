@@ -18,7 +18,7 @@
             map.addControl(new YMaps.SmallZoom());
 
             // Создание источника данных
-            var myData = new YMaps.TileDataSource("http://mt.gmapuploader.com/tiles/FVSH1JsvdT/", false, true);
+            var myData = new YMaps.TileDataSource("https://mt.gmapuploader.com/tiles/FVSH1JsvdT/", false, true);
             myData.getTileUrl = function (tile, zoom) {
                 return this.getTileUrlTemplate() + "/tile-" + zoom + "-" + (tile.y * Math.pow(2, zoom) + tile.x) + ".jpg";
             }
