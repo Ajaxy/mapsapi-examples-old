@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Примеры. Ломанная линия со стрелочками.</title>
+    <title>Примеры. ломаная линия со стрелочками.</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
     <script type="text/javascript">
@@ -25,7 +25,7 @@
             style.lineStyle.strokeWidth = 3;
             YMaps.Styles.add("style#Example", style);
 
-            // Создание ломанной со стрелочкам
+            // Создание ломаной со стрелочкам
             var polyline = new PolylineWithArrows([ 
                 new YMaps.GeoPoint(37.600963,55.575358), new YMaps.GeoPoint(37.508095,55.596356), new YMaps.GeoPoint(37.435574,55.66045),
                 new YMaps.GeoPoint(37.414553,55.685285), new YMaps.GeoPoint(37.385385,55.713877), new YMaps.GeoPoint(37.369431,55.745985),
@@ -37,7 +37,7 @@
                 new YMaps.GeoPoint(37.766432,55.605648), new YMaps.GeoPoint(37.687812,55.574365), new YMaps.GeoPoint(37.600963,55.575358)
             ], {style: "style#Example"});
 
-            // Добавление ломанной на карту
+            // Добавление ломаной на карту
             map.addOverlay(polyline);
         })
 
@@ -50,7 +50,7 @@
             return child.prototype = new c();
         };
 
-        // Ломанная со стрелочками
+        // ломаная со стрелочками
         // Наследуемся от YMaps.Polyline
         function PolylineWithArrows (points, options) {
             // Вызов родительского конструктора
@@ -59,14 +59,14 @@
             // Группа, в которой содержатся стрелочки
             var arrows = new YMaps.GeoObjectCollection(this.getComputedStyle()),
             
-                // Слушатель событий ломанной
+                // Слушатель событий ломаной
                 listener;
 
             // Вызывается при добавлении объекта на карту
             this.onAddToMap = function (map, mapContainer) {
                 YMaps.Polyline.prototype.onAddToMap.call(this, map);
                 
-                // При изменении позиции точки ломанной перерисовываем стрелочки
+                // При изменении позиции точки ломаной перерисовываем стрелочки
                 listener = YMaps.Events.observe(this, this.Events.PositionChange, function () {
                     this.updateArrows();
                 }, this);
@@ -83,7 +83,7 @@
                 // Удаление стрелочек с карты
                 this.getMap().removeOverlay(arrows);
 
-                // Удаление ломанной с карты
+                // Удаление ломаной с карты
                 YMaps.Polyline.prototype.onRemoveFromMap.call(this);
 
                 // Удаление обработчика событий
@@ -92,16 +92,16 @@
 
             // Вызывается при обновлении карты
             this.onMapUpdate = function () {
-                // Обновление ломанной на карте
+                // Обновление ломаной на карте
                 YMaps.Polyline.prototype.onMapUpdate.call(this);
 
                 // Перерисовка стрелочек
                 this.updateArrows();
             }
             
-            // Добавляет стрелочки для ломанной
+            // Добавляет стрелочки для ломаной
             this.updateArrows = function () {
-                // Толщина ломанной
+                // Толщина ломаной
                 var lineWidth = this.getComputedStyle().lineStyle.strokeWidth,
 
                     // Длина стрелочки
@@ -132,7 +132,7 @@
                                 // Отступ от сердины
                                 offsetMiddle = normal.scale(-arrowWidth / 2),
 
-                                // Перпендикуляры к сегменту ломанной
+                                // Перпендикуляры к сегменту ломаной
                                 arrowPart1 = new YMaps.Point(0 - offsetMiddle.getY(), offsetMiddle.getX()).scale(0.4),
                                 arrowPart2 = new YMaps.Point(offsetMiddle.getY(), 0 - offsetMiddle.getX()).scale(0.4),
 

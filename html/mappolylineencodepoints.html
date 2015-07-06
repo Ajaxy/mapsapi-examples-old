@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Примеры. Кодирование координат точек ломанной.</title>
+    <title>Примеры. Кодирование координат точек ломаной.</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
     <script type="text/javascript">
@@ -20,14 +20,14 @@
             map.addControl(new YMaps.TypeControl());
             map.addControl(new YMaps.ToolBar());
 
-            // Создание ломанной
+            // Создание ломаной
             var polyline = new YMaps.Polyline();
             map.addOverlay(polyline);
 
             // Включение режима редактирования
             polyline.startEditing();
 
-            // При щелчке на карте добавляем новую точку в конец ломанной
+            // При щелчке на карте добавляем новую точку в конец ломаной
             YMaps.Events.observe(map, map.Events.Click, function (map, mEvent) {
                 polyline.addPoint(mEvent.getGeoPoint());
             });
@@ -39,7 +39,7 @@
             });
         });
 
-        // Кодирование точек ломанной
+        // Кодирование точек ломаной
         function encodePoints (points) {
             var array = [],                     // Временный массив для точек
                 prev = new YMaps.Point(0,0),    // Предыдущая точка
@@ -167,7 +167,7 @@
             <div id="YMapsID"></div>
         </td>
         <td class="coord">
-            <div class="title">Координаты точек ломанной</div>
+            <div class="title">Координаты точек ломаной</div>
             <textarea id="Points" class="points" readonly="readonly"></textarea>
         </td>
     </tr>

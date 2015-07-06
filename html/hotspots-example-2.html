@@ -17,7 +17,7 @@
             map.enableScrollZoom();
             
             // Создаем источник "картиночных" тайлов
-            var ds = new YMaps.TileDataSource('heroes/', true, false);
+            var ds = new YMaps.TileDataSource('../heroes/', true, false);
             // Задаем правило формирования URL тайлов
             ds.getTileUrl = function (tileNumber, zoom) {
                 return this.getTileUrlTemplate() + 'tile-' + tileNumber.getX() + '-' + tileNumber.getY() + '-' + zoom + '.png';

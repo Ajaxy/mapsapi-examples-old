@@ -14,7 +14,7 @@
                 toolBar = new YMaps.ToolBar();
             
             // Создание кнопки-флажка (по умолчанию включена, т.к. элемент управления при добавлении на карту включается автоматически)
-            var buttonEdgeMoving = new YMaps.ToolBarToggleButton({icon: "/i/maps/icon-move.png"}, {selected: 1});
+            var buttonEdgeMoving = new YMaps.ToolBarToggleButton({icon: "../images/icon-move.png"}, {selected: 1});
             
             // Если кнопка активна, то включаем автоперемещение карты
             YMaps.Events.observe(buttonEdgeMoving, buttonEdgeMoving.Events.Select, function () {

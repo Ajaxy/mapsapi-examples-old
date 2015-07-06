@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Примеры. Создание ломанной из закодированных вершин.</title>
+    <title>Примеры. Создание ломаной из закодированных вершин.</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
     <script type="text/javascript">
@@ -13,13 +13,13 @@
             // Установка для карты ее центра и масштаба
             map.setCenter(new YMaps.GeoPoint(37.591298, 55.734172), 16);
 
-            // Создание стиля для ломанной
+            // Создание стиля для ломаной
             var style = new YMaps.Style();
             style.lineStyle = new YMaps.LineStyle();
             style.lineStyle.strokeColor = "8822DDC0";
             style.lineStyle.strokeWidth = 6;
 
-            // Создание ломанной и добавление ее на карту
+            // Создание ломаной и добавление ее на карту
             var polyline = YMaps.Polyline.fromEncodedPoints("6qE9AjZzUgN1-v__v_X__x_1__-dBgAA", "AAA");
             polyline.setStyle(style);
             map.addOverlay(polyline);

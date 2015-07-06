@@ -22,21 +22,21 @@
             // Наследуемся от базового стиля
             var styleFootBall = new YMaps.Style(baseStyle);
             styleFootBall.iconStyle = new YMaps.IconStyle();
-            styleFootBall.iconStyle.href = "/i/maps/football.png";
+            styleFootBall.iconStyle.href = "../images/football.png";
             var placemark = new YMaps.Placemark(new YMaps.GeoPoint(37.64, 55.76), {style: styleFootBall});
             map.addOverlay(placemark);
 
             // Наследуемся от базового стиля
             var styleBasketBall = new YMaps.Style(baseStyle);
             styleBasketBall.iconStyle = new YMaps.IconStyle();
-            styleBasketBall.iconStyle.href = "/i/maps/basketball.png";
+            styleBasketBall.iconStyle.href = "../images/basketball.png";
             var placemark2 = new YMaps.Placemark(new YMaps.GeoPoint(37.57, 55.65), {style: styleBasketBall});
             map.addOverlay(placemark2);
 
             // Наследуемся от базового стиля
             var styleTennis = new YMaps.Style(baseStyle);
             styleTennis.iconStyle = new YMaps.IconStyle();
-            styleTennis.iconStyle.href = "/i/maps/tennis.png";
+            styleTennis.iconStyle.href = "../images/tennis.png";
             var placemark3 = new YMaps.Placemark(new YMaps.GeoPoint(37.71, 55.77), {style: styleTennis});
             map.addOverlay(placemark3);
         });
